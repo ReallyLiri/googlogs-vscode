@@ -1,8 +1,9 @@
 import { GetEntriesResponse, Logging } from "@google-cloud/logging";
 import { GoogleAuth } from "google-auth-library/build/src/auth/googleauth";
+import { exec } from 'child_process';
 
-const {promisify} = require('util');
-const exec = promisify(require('child_process').exec)
+const promisify = require('util.promisify');
+const execAsync = promisify(exec);
 
 let _logging: Logging | undefined;
 
@@ -11,7 +12,7 @@ async function getLoggingAsync(): Promise<Logging> {
     return _logging;
   }
 
-  const token = (await exec("gcloud auth print-access-token")).stdout.trim();
+  const token: string = (await execAsync("gcloud auth print-access-token")).stdout.trim();
 
   const auth = new GoogleAuth({scopes: 'https://www.googleapis.com/auth/cloud-platform'});
   const client = await auth.getClient();
