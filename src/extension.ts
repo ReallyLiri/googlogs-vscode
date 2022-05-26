@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { ViewLoader } from './view/ViewLoader';
 import { CommonMessage } from './view/messages/messageTypes';
+import { readLogsAsync } from "./view/core/gcloudLogging";
 
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
@@ -22,6 +23,9 @@ export function activate(context: vscode.ExtensionContext) {
         });
     })
   );
+
+
+  readLogsAsync();
 }
 
 export function deactivate() {}

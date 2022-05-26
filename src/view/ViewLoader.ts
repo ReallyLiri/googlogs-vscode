@@ -1,14 +1,14 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { getAPIUserGender } from '../config';
-import { Message, CommonMessage } from './messages/messageTypes';
+import { CommonMessage, Message } from './messages/messageTypes';
 
 export class ViewLoader {
   public static currentPanel?: vscode.WebviewPanel;
 
   private panel: vscode.WebviewPanel;
   private context: vscode.ExtensionContext;
-  private disposables: vscode.Disposable[];
+  private readonly disposables: vscode.Disposable[];
 
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
@@ -20,17 +20,15 @@ export class ViewLoader {
       localResourceRoots: [vscode.Uri.file(path.join(this.context.extensionPath, 'out', 'app'))],
     });
 
-    // render webview
     this.renderWebview();
 
-    // listen messages from webview
     this.panel.webview.onDidReceiveMessage(
       (message: Message) => {
         if (message.type === 'RELOAD') {
           vscode.commands.executeCommand('workbench.action.webview.reloadWebviewAction');
         } else if (message.type === 'COMMON') {
           const text = (message as CommonMessage).payload;
-          vscode.window.showInformationMessage(`Received message from Webview: ${text}`);
+          vscode.window.showInformationMessage(`Received message from Webview: ${ text }`);
         }
       },
       null,
@@ -47,8 +45,7 @@ export class ViewLoader {
   }
 
   private renderWebview() {
-    const html = this.render();
-    this.panel.webview.html = html;
+    this.panel.webview.html = this.render();
   }
 
   static showWebview(context: vscode.ExtensionContext) {
@@ -64,22 +61,16 @@ export class ViewLoader {
   }
 
   static postMessageToWebview<T extends Message = Message>(message: T) {
-    // post message from extension to webview
-    const cls = this;
-    cls.currentPanel?.webview.postMessage(message);
+    this.currentPanel?.webview.postMessage(message);
   }
 
   public dispose() {
     ViewLoader.currentPanel = undefined;
 
-    // Clean up our resources
     this.panel.dispose();
 
     while (this.disposables.length) {
-      const x = this.disposables.pop();
-      if (x) {
-        x.dispose();
-      }
+      this.disposables.pop()?.dispose();
     }
   }
 
@@ -96,19 +87,18 @@ export class ViewLoader {
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>React App</title>
+          <title>Googelogs</title>
         </head>
-    
         <body>
           <div id="root"></div>
           <script>
             const vscode = acquireVsCodeApi();
-            const apiUserGender = "${gender}"
+            const apiUserGender = "${ gender }"
           </script>
           <script>
             console.log('apiUserGender', apiUserGender)
           </script>
-          <script src="${bundleScriptPath}"></script>
+          <script src="${ bundleScriptPath }"></script>
         </body>
       </html>
     `;
