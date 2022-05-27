@@ -3,7 +3,7 @@ import { MemoryRouter as Router, Link, Switch } from 'react-router-dom';
 import { routes } from '../routes/config';
 import { RouteWithSubRoutes } from '../routes/RouteWithSubRoutes';
 import { MessagesContext } from '../context/MessageContext';
-import { CommonMessage, Message, ReloadMessage } from '../../src/view/messages/messageTypes';
+import { CommonMessage, Message, ReloadMessage } from '../common/message';
 
 export const App = () => {
   const [messagesFromExtension, setMessagesFromExtension] = useState<string[]>([]);

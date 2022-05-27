@@ -1,7 +1,9 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { getAPIUserGender } from '../config';
-import { CommonMessage, Message } from './messages/messageTypes';
+import { FetchPageMessage, Message, MessageType } from '../../app/common/message';
+import { readLogsPageAsync } from "./core/loggingClient";
+import { getProjectsAsync } from "./core/projectsClient";
 
 export class ViewLoader {
   public static currentPanel?: vscode.WebviewPanel;
@@ -23,12 +25,14 @@ export class ViewLoader {
     this.renderWebview();
 
     this.panel.webview.onDidReceiveMessage(
-      (message: Message) => {
-        if (message.type === 'RELOAD') {
-          vscode.commands.executeCommand('workbench.action.webview.reloadWebviewAction');
-        } else if (message.type === 'COMMON') {
-          const text = (message as CommonMessage).payload;
-          vscode.window.showInformationMessage(`Received message from Webview: ${ text }`);
+      async (message: Message) => {
+        switch (message.type) {
+          case MessageType.FETCH_PAGE:
+            const pageResultMessage = await readLogsPageAsync(message as FetchPageMessage);
+            this.panel.webview.postMessage(pageResultMessage);
+            break;
+          default:
+            console.error("unexpected message type", message);
         }
       },
       null,
@@ -42,6 +46,10 @@ export class ViewLoader {
       null,
       this.disposables
     );
+
+    getProjectsAsync().then(projects => {
+      this.panel.webview.postMessage({type: MessageType.PROJECTS_LIST, projects})
+    });
   }
 
   private renderWebview() {
@@ -93,10 +101,6 @@ export class ViewLoader {
           <div id="root"></div>
           <script>
             const vscode = acquireVsCodeApi();
-            const apiUserGender = "${ gender }"
-          </script>
-          <script>
-            console.log('apiUserGender', apiUserGender)
           </script>
           <script src="${ bundleScriptPath }"></script>
         </body>
