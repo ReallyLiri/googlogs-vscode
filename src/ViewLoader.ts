@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { getAPIUserGender } from '../config';
-import { FetchPageMessage, Message, MessageType } from '../../app/common/message';
+import { FetchPageMessage, Message, MessageType, ProjectsResultMessage } from '../app/common/message';
 import { readLogsPageAsync } from "./core/loggingClient";
 import { getProjectsAsync } from "./core/projectsClient";
 
@@ -16,25 +15,18 @@ export class ViewLoader {
     this.context = context;
     this.disposables = [];
 
-    this.panel = vscode.window.createWebviewPanel('reactApp', 'React App', vscode.ViewColumn.One, {
+    const options = {
       enableScripts: true,
       retainContextWhenHidden: true,
       localResourceRoots: [vscode.Uri.file(path.join(this.context.extensionPath, 'out', 'app'))],
-    });
+    };
+
+    this.panel = vscode.window.createWebviewPanel('googelogs', 'Google Logs', vscode.ViewColumn.One, options);
 
     this.renderWebview();
 
     this.panel.webview.onDidReceiveMessage(
-      async (message: Message) => {
-        switch (message.type) {
-          case MessageType.FETCH_PAGE:
-            const pageResultMessage = await readLogsPageAsync(message as FetchPageMessage);
-            this.panel.webview.postMessage(pageResultMessage);
-            break;
-          default:
-            console.error("unexpected message type", message);
-        }
-      },
+      this.onDidReceiveMessage,
       null,
       this.disposables
     );
@@ -46,10 +38,27 @@ export class ViewLoader {
       null,
       this.disposables
     );
+  }
 
-    getProjectsAsync().then(projects => {
-      this.panel.webview.postMessage({type: MessageType.PROJECTS_LIST, projects})
-    });
+  private async fetchAndPostDataAsync<TOut extends Message>(fetcher: (() => Promise<TOut>)) {
+    const result = await fetcher();
+    this.panel.webview.postMessage(result);
+  }
+
+  private async onDidReceiveMessage(message: Message) {
+    switch (message.type) {
+      case MessageType.FETCH_PAGE:
+        await this.fetchAndPostDataAsync(() => readLogsPageAsync(message as FetchPageMessage));
+        break;
+      case MessageType.FETCH_PROJECTS:
+        await this.fetchAndPostDataAsync<ProjectsResultMessage>(async () => ({
+          type: MessageType.PROJECTS_RESULT,
+          projects: await getProjectsAsync()
+        }));
+        break;
+      default:
+        console.error("unexpected message type", message);
+    }
   }
 
   private renderWebview() {
@@ -68,10 +77,6 @@ export class ViewLoader {
     }
   }
 
-  static postMessageToWebview<T extends Message = Message>(message: T) {
-    this.currentPanel?.webview.postMessage(message);
-  }
-
   public dispose() {
     ViewLoader.currentPanel = undefined;
 
@@ -86,8 +91,6 @@ export class ViewLoader {
     const bundleScriptPath = this.panel.webview.asWebviewUri(
       vscode.Uri.file(path.join(this.context.extensionPath, 'out', 'app', 'bundle.js'))
     );
-
-    const gender = getAPIUserGender();
 
     return `
       <!DOCTYPE html>

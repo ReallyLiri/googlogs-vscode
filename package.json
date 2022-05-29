@@ -1,7 +1,7 @@
 {
-  "name": "vscode-webview-react-boilerplate",
-  "displayName": "VSCode webview react boilerplate",
-  "description": "Boilerplate for developing webview using react in VSCode extension",
+  "name": "googlogs",
+  "displayName": "Googlogs",
+  "description": "Google cloud logs viewer",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.52.0"
@@ -9,45 +9,27 @@
   "categories": [
     "Other"
   ],
-  "keywords": [
-    "vscode",
-    "vscode-extension",
-    "vscode-extension-boilerplate",
-    "boilerplate"
-  ],
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "googelogs.explorer"
   ],
   "main": "./out/src/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "webview.open",
-        "title": "Open Webview",
-        "category": "Webview React"
-      },
-      {
-        "command": "extension.sendMessage",
-        "title": "Send Message to Webview",
-        "category": "Webview React"
+        "command": "googelogs.openLogsViewer",
+        "title": "View Google Logs",
+        "category": "Googelogs"
       }
     ],
-    "configuration": {
-      "title": "Webview React",
-      "properties": {
-        "webviewReact.userApiGender": {
-          "type": "string",
-          "default": "male",
-          "enum": [
-            "male",
-            "female"
-          ],
-          "enumDescriptions": [
-            "Fetching user information with gender of male",
-            "Fetching user information with gender of female"
-          ]
+    "views": {
+      "explorer": [
+        {
+          "type": "webview",
+          "id": "googelogs.view",
+          "name": "Googelogs"
         }
-      }
+      ]
     }
   },
   "scripts": {
@@ -68,7 +50,9 @@
     "moment": "^2.29.3",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
-    "react-router-dom": "^5.2.0"
+    "react-infinite-scroll-component": "^6.1.0",
+    "react-router-dom": "^5.2.0",
+    "styled-components": "^5.3.5"
   },
   "devDependencies": {
     "@types/glob": "^7.1.3",

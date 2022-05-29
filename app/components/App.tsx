@@ -1,63 +1,74 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { MemoryRouter as Router, Link, Switch } from 'react-router-dom';
-import { routes } from '../routes/config';
-import { RouteWithSubRoutes } from '../routes/RouteWithSubRoutes';
-import { MessagesContext } from '../context/MessageContext';
-import { CommonMessage, Message, ReloadMessage } from '../common/message';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Entry } from "@google-cloud/logging";
+import { GoogleProject } from "../common/googleProject";
+import { getDefaultOptions } from "../data/options";
+import { fetchPageAsync, fetchProjectsAsync } from "../data/fetchData";
+import { MessageType } from "../common/message";
+import InfiniteScroll from "react-infinite-scroll-component";
+
 
 export const App = () => {
-  const [messagesFromExtension, setMessagesFromExtension] = useState<string[]>([]);
-
-  const handleMessagesFromExtension = useCallback(
-    (event: MessageEvent<Message>) => {
-      if (event.data.type === 'COMMON') {
-        const message = event.data as CommonMessage;
-        setMessagesFromExtension([...messagesFromExtension, message.payload]);
-      }
-    },
-    [messagesFromExtension]
-  );
+  const [options, setOptions] = [vscode.getState() || getDefaultOptions(""), vscode.setState];
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const [nextPageToken, setNextPageToken] = useState<string | null>();
+  const [projects, setProjects] = useState<GoogleProject[]>([]);
 
   useEffect(() => {
-    window.addEventListener('message', (event: MessageEvent<Message>) => {
-      handleMessagesFromExtension(event);
-    });
+    fetchProjectsAsync()
+      .then(projectsResult => {
+        const googleProjects = projectsResult.projects;
+        if (googleProjects.length === 0) {
+          console.error("no projects were fetched");
+          return;
+        }
+        setProjects(googleProjects);
+        if (options.filter.projectId.length === 0) {
+          setOptions({...options, filter: {...options.filter, projectId: googleProjects[0].id}})
+        }
+      })
+      .catch(error => console.error(error));
+  });
 
-    return () => {
-      window.removeEventListener('message', handleMessagesFromExtension);
-    };
-  }, [handleMessagesFromExtension]);
-
-  const handleReloadWebview = () => {
-    vscode.postMessage<ReloadMessage>({
-      type: 'RELOAD',
+  const fetchPageCallback = useCallback(async () => {
+    const result = await fetchPageAsync({
+      type: MessageType.FETCH_PAGE,
+      pageToken: nextPageToken || null,
+      ...options
     });
-  };
+    setNextPageToken(result.nextPageToken);
+    setEntries(currentEntries => [...currentEntries, ...result.entries]);
+  }, [options, nextPageToken]);
 
   return (
-    <Router
-      initialEntries={['/', '/about', '/message', '/message/received', '/message/send']}
-    >
-      <ul className="navbar">
-        <li>
-          <Link to="/">Home</Link>
-        </li>
-        <li>
-          <Link to="/about">About</Link>
-        </li>
-        <li>
-          <Link to="/message">Message</Link>
-        </li>
-      </ul>
-      <button onClick={handleReloadWebview}>Reload Webview</button>
-
-      <MessagesContext.Provider value={messagesFromExtension}>
-        <Switch>
-          {routes.map((route, i) => (
-            <RouteWithSubRoutes key={i} {...route} />
-          ))}
-        </Switch>
-      </MessagesContext.Provider>
-    </Router>
+    <>
+      <div>
+        { projects.map(project => <div key={ project.id }>{ project.name }</div>) }
+      </div>
+      <div
+        id="scrollableDiv"
+        style={ {
+          height: 300,
+          overflow: 'auto',
+          display: 'flex',
+          flexDirection: 'column-reverse',
+        } }
+      >
+        <InfiniteScroll
+          dataLength={ entries.length }
+          next={ fetchPageCallback }
+          style={ {display: 'flex', flexDirection: 'column-reverse'} }
+          inverse
+          hasMore={ nextPageToken === null }
+          loader={ <h4>Loading...</h4> }
+          scrollableTarget="scrollableDiv"
+        >
+          { entries.map((entry, index) => (
+            <div key={ index }>
+              { JSON.stringify(entry) }
+            </div>
+          )) }
+        </InfiniteScroll>
+      </div>
+    </>
   );
 };

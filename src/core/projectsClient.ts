@@ -1,6 +1,6 @@
 import { getAuthAsync } from "./auth";
 import { ProjectsClient } from "@google-cloud/resource-manager";
-import { Project } from "../../../app/common/project";
+import { GoogleProject } from "../../app/common/googleProject";
 
 let _projects: ProjectsClient | undefined;
 
@@ -13,9 +13,9 @@ async function getProjectsClientAsync(): Promise<ProjectsClient> {
   return _projects;
 }
 
-export async function getProjectsAsync(): Promise<Project[]> {
+export async function getProjectsAsync(): Promise<GoogleProject[]> {
   try {
-    const projects: Project[] = [];
+    const projects: GoogleProject[] = [];
     for await (const project of (await getProjectsClientAsync()).listProjectsAsync()) {
       projects.push({id: project.projectId!, name: project.name!})
     }

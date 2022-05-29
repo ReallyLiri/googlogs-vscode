@@ -1,7 +1,7 @@
 import { GetEntriesResponse, Logging } from "@google-cloud/logging";
 import { getAuthAsync } from "./auth";
-import { FetchPageMessage, MessageType, PageResultMessage } from "../../../app/common/message";
-import { LogFilter } from "../../../app/common/filter";
+import { FetchPageMessage, MessageType, PageResultMessage } from "../../app/common/message";
+import { LogFilter } from "../../app/common/filter";
 import * as moment from "moment";
 
 let _logging: Logging | undefined;
@@ -54,7 +54,7 @@ export async function readLogsPageAsync(request: FetchPageMessage): Promise<Page
       orderBy: "timestamp desc",
       autoPaginate: false,
       pageSize: request.pageSize,
-      pageToken: request.pageToken,
+      pageToken: request.pageToken ?? undefined,
     });
     return {type: MessageType.PAGE_RESULT, entries, nextPageToken: response.nextPageToken || null};
   } catch (e) {

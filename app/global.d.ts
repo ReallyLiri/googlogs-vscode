@@ -1,5 +1,5 @@
 type Message = import('./common/message').Message;
-type State = import('./core/state').State;
+type State = import('./data/options').Options;
 
 type VSCode = {
   postMessage<T extends Message = Message>(message: T): void;
