@@ -1,8 +1,30 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { FetchPageMessage, Message, MessageType, ProjectsResultMessage } from '../app/common/message';
+import { FetchPageMessage, Message, ProjectsResultMessage } from '../app/common/message';
 import { readLogsPageAsync } from "./core/loggingClient";
 import { getProjectsAsync } from "./core/projectsClient";
+import { MessageType } from "../app/common/messageType";
+
+async function fetchAndPostDataAsync<TOut extends Message>(panel: vscode.WebviewPanel, fetcher: (() => Promise<TOut>)) {
+  const result = await fetcher();
+  panel.webview.postMessage(result);
+}
+
+async function handleMessage(panel: vscode.WebviewPanel, message: Message) {
+  switch (message.type) {
+    case MessageType.FETCH_PAGE:
+      await fetchAndPostDataAsync(panel, () => readLogsPageAsync(message as FetchPageMessage));
+      break;
+    case MessageType.FETCH_PROJECTS:
+      await fetchAndPostDataAsync<ProjectsResultMessage>(panel, async () => ({
+        type: MessageType.PROJECTS_RESULT,
+        projects: await getProjectsAsync()
+      }));
+      break;
+    default:
+      console.error("unexpected message type", message);
+  }
+}
 
 export class ViewLoader {
   public static currentPanel?: vscode.WebviewPanel;
@@ -26,7 +48,7 @@ export class ViewLoader {
     this.renderWebview();
 
     this.panel.webview.onDidReceiveMessage(
-      this.onDidReceiveMessage,
+      message => handleMessage(this.panel, message),
       null,
       this.disposables
     );
@@ -38,27 +60,6 @@ export class ViewLoader {
       null,
       this.disposables
     );
-  }
-
-  private async fetchAndPostDataAsync<TOut extends Message>(fetcher: (() => Promise<TOut>)) {
-    const result = await fetcher();
-    this.panel.webview.postMessage(result);
-  }
-
-  private async onDidReceiveMessage(message: Message) {
-    switch (message.type) {
-      case MessageType.FETCH_PAGE:
-        await this.fetchAndPostDataAsync(() => readLogsPageAsync(message as FetchPageMessage));
-        break;
-      case MessageType.FETCH_PROJECTS:
-        await this.fetchAndPostDataAsync<ProjectsResultMessage>(async () => ({
-          type: MessageType.PROJECTS_RESULT,
-          projects: await getProjectsAsync()
-        }));
-        break;
-      default:
-        console.error("unexpected message type", message);
-    }
   }
 
   private renderWebview() {

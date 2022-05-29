@@ -1,13 +1,8 @@
 import { LogFilter } from "./filter";
-import { Entry } from "@google-cloud/logging";
 import { GoogleProject } from "./googleProject";
-
-export enum MessageType {
-  FETCH_PAGE = 'FETCH_PAGE',
-  PAGE_RESULT = 'PAGE_RESULT',
-  FETCH_PROJECTS = 'FETCH_PROJECTS',
-  PROJECTS_RESULT = 'PROJECTS_RESULT'
-}
+import { MessageType } from "./messageType";
+import { google } from "@google-cloud/logging/build/protos/protos";
+import ILogEntry = google.logging.v2.ILogEntry;
 
 export interface Message {
   type: MessageType;
@@ -22,7 +17,7 @@ export interface FetchPageMessage extends Message {
 
 export interface PageResultMessage extends Message {
   type: MessageType.PAGE_RESULT;
-  entries: Entry[];
+  entries: ILogEntry[];
   nextPageToken: string | null;
 }
 

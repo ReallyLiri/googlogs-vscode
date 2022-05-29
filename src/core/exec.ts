@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
+import { promisify } from "util";
 
-const promisify = require('util.promisify');
 const _execAsync = promisify(exec);
 
 export const execAsync = async (command: string): Promise<string> =>

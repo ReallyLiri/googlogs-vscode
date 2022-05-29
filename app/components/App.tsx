@@ -3,8 +3,8 @@ import { Entry } from "@google-cloud/logging";
 import { GoogleProject } from "../common/googleProject";
 import { getDefaultOptions } from "../data/options";
 import { fetchPageAsync, fetchProjectsAsync } from "../data/fetchData";
-import { MessageType } from "../common/message";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { MessageType } from "../common/messageType";
 
 
 export const App = () => {
@@ -12,8 +12,25 @@ export const App = () => {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [nextPageToken, setNextPageToken] = useState<string | null>();
   const [projects, setProjects] = useState<GoogleProject[]>([]);
+  const projectIsSelected = options.filter.projectId.length > 0;
+
+  const resetEntries = useCallback(() => {
+    setEntries([]);
+    setNextPageToken(undefined);
+  }, [setEntries, setNextPageToken]);
+
+  const setProject = useCallback((projectId: string) => {
+    if (projectId === options.filter.projectId) {
+      return;
+    }
+    setOptions({...options, filter: {...options.filter, projectId}});
+    resetEntries();
+  }, [setOptions, resetEntries]);
 
   useEffect(() => {
+    if (projects.length > 0) {
+      return;
+    }
     fetchProjectsAsync()
       .then(projectsResult => {
         const googleProjects = projectsResult.projects;
@@ -22,12 +39,12 @@ export const App = () => {
           return;
         }
         setProjects(googleProjects);
-        if (options.filter.projectId.length === 0) {
-          setOptions({...options, filter: {...options.filter, projectId: googleProjects[0].id}})
+        if (projectIsSelected) {
+          setProject(googleProjects[0].id);
         }
       })
       .catch(error => console.error(error));
-  });
+  }, [projects, setProjects]);
 
   const fetchPageCallback = useCallback(async () => {
     const result = await fetchPageAsync({
@@ -42,33 +59,35 @@ export const App = () => {
   return (
     <>
       <div>
-        { projects.map(project => <div key={ project.id }>{ project.name }</div>) }
+        { projects.map(project => <div key={ project.id } onClick={ () => setProject(project.id) }>{ project.name }</div>) }
       </div>
-      <div
-        id="scrollableDiv"
-        style={ {
-          height: 300,
-          overflow: 'auto',
-          display: 'flex',
-          flexDirection: 'column-reverse',
-        } }
-      >
-        <InfiniteScroll
-          dataLength={ entries.length }
-          next={ fetchPageCallback }
-          style={ {display: 'flex', flexDirection: 'column-reverse'} }
-          inverse
-          hasMore={ nextPageToken === null }
-          loader={ <h4>Loading...</h4> }
-          scrollableTarget="scrollableDiv"
-        >
-          { entries.map((entry, index) => (
-            <div key={ index }>
-              { JSON.stringify(entry) }
-            </div>
-          )) }
-        </InfiniteScroll>
-      </div>
+      {
+        projectIsSelected && <div
+              id="scrollableDiv"
+              style={ {
+                height: 300,
+                overflow: 'auto',
+                display: 'flex',
+                flexDirection: 'column-reverse',
+              } }
+          >
+              <InfiniteScroll
+                  dataLength={ entries.length }
+                  next={ fetchPageCallback }
+                  style={ {display: 'flex', flexDirection: 'column-reverse', height: 500} }
+                  inverse
+                  hasMore={ true }
+                  loader={ <h4>Loading...</h4> }
+                  scrollableTarget="scrollableDiv"
+              >
+                { entries.map((entry, index) => (
+                  <div key={ index }>
+                    { JSON.stringify(entry) }
+                  </div>
+                )) }
+              </InfiniteScroll>
+          </div>
+      }
     </>
   );
 };

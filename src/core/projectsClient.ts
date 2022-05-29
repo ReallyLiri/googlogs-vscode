@@ -1,25 +1,12 @@
-import { getAuthAsync } from "./auth";
-import { ProjectsClient } from "@google-cloud/resource-manager";
 import { GoogleProject } from "../../app/common/googleProject";
-
-let _projects: ProjectsClient | undefined;
-
-async function getProjectsClientAsync(): Promise<ProjectsClient> {
-  if (_projects) {
-    return _projects;
-  }
-  // @ts-ignore
-  _projects = new ProjectsClient({auth: await getAuthAsync()});
-  return _projects;
-}
+import { execAsync } from "./exec";
+import * as protos from "@google-cloud/resource-manager/build/protos/protos";
 
 export async function getProjectsAsync(): Promise<GoogleProject[]> {
   try {
-    const projects: GoogleProject[] = [];
-    for await (const project of (await getProjectsClientAsync()).listProjectsAsync()) {
-      projects.push({id: project.projectId!, name: project.name!})
-    }
-    return projects;
+    const json: string = await execAsync("gcloud projects list --format=json");
+    const googleProjects = JSON.parse(json) as protos.google.cloud.resourcemanager.v3.IProject[];
+    return googleProjects.map(project => ({id: project.projectId!, name: project.name!}));
   } catch (e) {
     console.error("failed fetching projects", e);
     return [];

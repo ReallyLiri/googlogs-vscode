@@ -1,4 +1,5 @@
-import { FetchPageMessage, FetchProjectsMessage, Message, MessageType, PageResultMessage, ProjectsResultMessage } from "../common/message";
+import { FetchPageMessage, FetchProjectsMessage, Message, PageResultMessage, ProjectsResultMessage } from "../common/message";
+import { MessageType } from "../common/messageType";
 
 async function fetchDataAsync<TInMessage extends Message, TOutMessage extends Message>(
   message: TInMessage,
@@ -10,17 +11,20 @@ async function fetchDataAsync<TInMessage extends Message, TOutMessage extends Me
     const listener: EventListener = event => {
       try {
         const fetchResult = (event as any).data as TOutMessage;
+        if (!fetchResult || fetchResult.type !== resultMessageType) {
+          return;
+        }
         console.log("fetchResult", fetchResult);
         resolve(fetchResult);
+        window.removeEventListener('message', listener);
       } catch (e) {
         console.error("fetch failed", e);
         reject(e);
-      } finally {
-        window.removeEventListener(resultMessageType, listener);
+        window.removeEventListener('message', listener);
       }
     }
 
-    window.addEventListener(resultMessageType, listener);
+    window.addEventListener('message', listener);
     vscode.postMessage(message);
   });
 }
