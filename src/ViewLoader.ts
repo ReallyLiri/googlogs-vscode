@@ -1,16 +1,20 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { FetchPageMessage, Message, ProjectsResultMessage } from '../app/common/message';
+import { FetchPageMessage, Message, OptionsResultMessage, ProjectsResultMessage } from '../app/common/message';
 import { readLogsPageAsync } from "./core/loggingClient";
 import { getProjectsAsync } from "./core/projectsClient";
 import { MessageType } from "../app/common/messageType";
+import { LocalStorageService } from "./core/persist";
+import { getDefaultOptions } from "../app/data/options";
+
+const OPTIONS_KEY = "options.v1";
 
 async function fetchAndPostDataAsync<TOut extends Message>(panel: vscode.WebviewPanel, fetcher: (() => Promise<TOut>)) {
   const result = await fetcher();
   panel.webview.postMessage(result);
 }
 
-async function handleMessage(panel: vscode.WebviewPanel, message: Message) {
+async function handleMessage(panel: vscode.WebviewPanel, message: Message, storage: LocalStorageService) {
   switch (message.type) {
     case MessageType.FETCH_PAGE:
       await fetchAndPostDataAsync(panel, () => readLogsPageAsync(message as FetchPageMessage));
@@ -21,6 +25,18 @@ async function handleMessage(panel: vscode.WebviewPanel, message: Message) {
         projects: await getProjectsAsync()
       }));
       break;
+    case MessageType.FETCH_OPTIONS:
+      await fetchAndPostDataAsync(panel, async () => ({
+        type: MessageType.OPTIONS_RESULT,
+        options: await storage.getValue(OPTIONS_KEY) || getDefaultOptions("")
+      }));
+      break;
+    case MessageType.OPTIONS_RESULT:
+      await fetchAndPostDataAsync(panel, async () => {
+        await storage.setValue(OPTIONS_KEY, (message as OptionsResultMessage).options);
+        return {type: MessageType.ACK};
+      });
+      break;
     default:
       console.error("unexpected message type", message);
   }
@@ -29,13 +45,15 @@ async function handleMessage(panel: vscode.WebviewPanel, message: Message) {
 export class ViewLoader {
   public static currentPanel?: vscode.WebviewPanel;
 
-  private panel: vscode.WebviewPanel;
-  private context: vscode.ExtensionContext;
+  private readonly context: vscode.ExtensionContext;
+  private readonly panel: vscode.WebviewPanel;
   private readonly disposables: vscode.Disposable[];
+  private readonly storage: LocalStorageService;
 
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
     this.disposables = [];
+    this.storage = new LocalStorageService(context.workspaceState);
 
     const options = {
       enableScripts: true,
@@ -48,7 +66,7 @@ export class ViewLoader {
     this.renderWebview();
 
     this.panel.webview.onDidReceiveMessage(
-      message => handleMessage(this.panel, message),
+      message => handleMessage(this.panel, message, this.storage),
       null,
       this.disposables
     );

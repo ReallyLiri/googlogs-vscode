@@ -1,15 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { GoogleProject } from "../common/googleProject";
 import { getDefaultOptions, Options } from "../data/options";
-import { fetchPageAsync, fetchProjectsAsync, isBrowserDebug } from "../data/fetchData";
+import { fetchOptionsAsync, fetchPageAsync, fetchProjectsAsync, postOptionsAsync } from "../data/fetchData";
 import { MessageType } from "../common/messageType";
 import { google } from "@google-cloud/logging/build/protos/protos";
 import { LogsTable } from "./LogsTable";
-import PageLoading from "./Loader";
+import Loader from "./Loader";
 import OptionsPane from "./OptionsPane";
 import styled from "styled-components";
+import { OptionsResultMessage, ProjectsResultMessage } from "../common/message";
 import ILogEntry = google.logging.v2.ILogEntry;
-import Loader from "./Loader";
 
 const StyledOptionsPane = styled(OptionsPane)`
   margin: 8px 0 8px 8px;
@@ -20,36 +20,37 @@ const StyledLogsTable = styled(LogsTable)`
 `;
 
 export const App = () => {
-  const [options, setOptions] = isBrowserDebug
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    ? useState<Options>(getDefaultOptions(""))
-    : [vscode.getState() || getDefaultOptions(""), vscode.setState];
+  const [options, setOptions] = useState<Options>(getDefaultOptions(""));
   const [entries, setEntries] = useState<ILogEntry[]>([]);
   const [nextPageToken, setNextPageToken] = useState<string | null>();
   const [projects, setProjects] = useState<GoogleProject[]>();
   const projectIsSelected = options.filter.projectId.length > 0;
   const [showEntries, setShowEntries] = useState(projectIsSelected);
 
-  const setPartialOptions = useCallback((newOptions: Partial<Options>) => {
+  const setPartialOptions = useCallback((newOptions: Partial<Options>, persist: boolean = true) => {
     console.log("setting partial options", newOptions);
-    setOptions({...options, ...newOptions, filter: {...options.filter, ...newOptions.filter}});
+    const fullNewOptions: Options = {...options, ...newOptions, filter: {...options.filter, ...newOptions.filter}};
+    setOptions(fullNewOptions);
+    if (persist) {
+      // noinspection JSIgnoredPromiseFromCall
+      postOptionsAsync(fullNewOptions);
+    }
   }, [options, setOptions]);
 
   useEffect(() => {
-    if (projects !== undefined) {
-      return;
-    }
-    fetchProjectsAsync()
-      .then(projectsResult => {
-        const googleProjects = projectsResult.projects;
-        if (googleProjects.length === 0) {
-          console.error("no projects were fetched");
-          return;
-        }
-        setProjects(googleProjects);
-      })
+    const loaders = [fetchOptionsAsync(), fetchProjectsAsync()];
+    Promise.all(loaders).then(results => {
+      const loadedOptions = (results[0] as OptionsResultMessage).options;
+      const googleProjects = (results[1] as ProjectsResultMessage).projects;
+      setProjects(googleProjects);
+      setPartialOptions(loadedOptions, false);
+      if (loadedOptions.filter.projectId.length > 0) {
+        resetEntries();
+      }
+    })
       .catch(error => console.error(error));
-  }, [projectIsSelected, projects, setProjects]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchPageCallback = useCallback(async () => {
     const result = await fetchPageAsync({
@@ -73,18 +74,10 @@ export const App = () => {
     }
   }, [projectIsSelected, setEntries, setNextPageToken, fetchPageCallback]);
 
-  useEffect(() => {
-    if (projectIsSelected) {
-      console.log("fetching first time data");
-      resetEntries();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
     <>
       {
-        !projects && <Loader type="Audio" title="Loading..." floating size={100}/>
+        !projects && <Loader type="Audio" title="Loading..." floating size={ 100 }/>
       }
       {
         projects && <StyledOptionsPane

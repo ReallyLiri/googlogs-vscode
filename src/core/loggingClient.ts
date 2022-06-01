@@ -45,7 +45,7 @@ export async function readLogsPageAsync(request: FetchPageMessage): Promise<Page
   try {
     const requestBody: GetEntriesRequest = {
       filter: buildFilterText(request.filter),
-      resourceNames: `projects/${ request.filter.projectId }`,
+      resourceNames: [`projects/${ request.filter.projectId }`],
       orderBy: "timestamp desc",
       pageSize: request.pageSize,
       pageToken: request.pageToken ?? undefined,
@@ -66,7 +66,7 @@ export async function readLogsPageAsync(request: FetchPageMessage): Promise<Page
     } else {
       const entriesResponses = response.data as IListLogEntriesResponse;
       result.entries = entriesResponses.entries || [];
-      result.nextPageToken = entriesResponses.nextPageToken || null;
+      result.nextPageToken = result.entries.length === 0 ? null : entriesResponses.nextPageToken || null;
     }
   } catch (e) {
     console.error("failed fetching logs", e);

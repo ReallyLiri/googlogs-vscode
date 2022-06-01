@@ -1,6 +1,7 @@
-import { FetchPageMessage, FetchProjectsMessage, Message, PageResultMessage, ProjectsResultMessage } from "../common/message";
+import { FetchOptionsMessage, FetchPageMessage, FetchProjectsMessage, Message, MessageAck, OptionsResultMessage, PageResultMessage, ProjectsResultMessage } from "../common/message";
 import { MessageType } from "../common/messageType";
 import { MOCK_LOGS, MOCK_PROJECTS } from "./mock";
+import { getDefaultOptions, Options } from "./options";
 
 const sleep = (seconds: number) => {
   return new Promise((resolve) => setTimeout(resolve, Math.ceil(seconds * 1000)));
@@ -55,5 +56,25 @@ export const fetchPageAsync = async (message: FetchPageMessage): Promise<PageRes
   return await fetchDataAsync<FetchPageMessage, PageResultMessage>(
     message,
     MessageType.PAGE_RESULT
+  );
+};
+
+export const fetchOptionsAsync = async (): Promise<OptionsResultMessage> => {
+  if (isBrowserDebug) {
+    return {type: MessageType.OPTIONS_RESULT, options: getDefaultOptions("")};
+  }
+  return await fetchDataAsync<FetchOptionsMessage, OptionsResultMessage>(
+    {type: MessageType.FETCH_OPTIONS},
+    MessageType.OPTIONS_RESULT
+  );
+};
+
+export const postOptionsAsync = async (options: Options): Promise<void> => {
+  if (isBrowserDebug) {
+    return;
+  }
+  await fetchDataAsync<OptionsResultMessage, MessageAck>(
+    {type: MessageType.OPTIONS_RESULT, options},
+    MessageType.ACK
   );
 };
