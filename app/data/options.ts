@@ -5,9 +5,9 @@ export const getDefaultOptions = (projectId: string): Options => ({
     projectId: projectId
   },
   pageSize: 20
-})
+});
 
 export type Options = {
   filter: LogFilter,
   pageSize: number
-}
+};

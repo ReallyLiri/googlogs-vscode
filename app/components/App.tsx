@@ -4,11 +4,20 @@ import { getDefaultOptions, Options } from "../data/options";
 import { fetchPageAsync, fetchProjectsAsync, isBrowserDebug } from "../data/fetchData";
 import { MessageType } from "../common/messageType";
 import { google } from "@google-cloud/logging/build/protos/protos";
-import styled from "styled-components";
 import { LogsTable } from "./LogsTable";
+import PageLoading from "./Loader";
+import OptionsPane from "./OptionsPane";
+import styled from "styled-components";
 import ILogEntry = google.logging.v2.ILogEntry;
+import Loader from "./Loader";
 
+const StyledOptionsPane = styled(OptionsPane)`
+  margin: 8px 0 8px 8px;
+`;
 
+const StyledLogsTable = styled(LogsTable)`
+  margin: 8px 0 8px 8px;
+`;
 
 export const App = () => {
   const [options, setOptions] = isBrowserDebug
@@ -17,24 +26,17 @@ export const App = () => {
     : [vscode.getState() || getDefaultOptions(""), vscode.setState];
   const [entries, setEntries] = useState<ILogEntry[]>([]);
   const [nextPageToken, setNextPageToken] = useState<string | null>();
-  const [projects, setProjects] = useState<GoogleProject[]>([]);
+  const [projects, setProjects] = useState<GoogleProject[]>();
   const projectIsSelected = options.filter.projectId.length > 0;
+  const [showEntries, setShowEntries] = useState(projectIsSelected);
 
-  const resetEntries = useCallback(() => {
-    setEntries([]);
-    setNextPageToken(undefined);
-  }, [setEntries, setNextPageToken]);
-
-  const setProject = useCallback((projectId: string) => {
-    if (projectId === options.filter.projectId) {
-      return;
-    }
-    setOptions({...options, filter: {...options.filter, projectId}});
-    resetEntries();
-  }, [options, setOptions, resetEntries]);
+  const setPartialOptions = useCallback((newOptions: Partial<Options>) => {
+    console.log("setting partial options", newOptions);
+    setOptions({...options, ...newOptions, filter: {...options.filter, ...newOptions.filter}});
+  }, [options, setOptions]);
 
   useEffect(() => {
-    if (projects.length > 0) {
+    if (projects !== undefined) {
       return;
     }
     fetchProjectsAsync()
@@ -45,12 +47,9 @@ export const App = () => {
           return;
         }
         setProjects(googleProjects);
-        if (projectIsSelected) {
-          setProject(googleProjects[0].id);
-        }
       })
       .catch(error => console.error(error));
-  }, [projectIsSelected, projects, setProject, setProjects]);
+  }, [projectIsSelected, projects, setProjects]);
 
   const fetchPageCallback = useCallback(async () => {
     const result = await fetchPageAsync({
@@ -62,20 +61,41 @@ export const App = () => {
     setEntries(currentEntries => [...currentEntries, ...result.entries]);
   }, [options, nextPageToken]);
 
-  useEffect(() => {
-    if (projectIsSelected && nextPageToken === undefined) {
+  const resetEntries = useCallback(() => {
+    console.log("resetting entries...");
+    setEntries([]);
+    setNextPageToken(undefined);
+    if (projectIsSelected) {
+      console.log("making call for first page");
       // noinspection JSIgnoredPromiseFromCall
       fetchPageCallback();
+      setShowEntries(true);
     }
-  }, [projectIsSelected, nextPageToken, fetchPageCallback]);
+  }, [projectIsSelected, setEntries, setNextPageToken, fetchPageCallback]);
+
+  useEffect(() => {
+    if (projectIsSelected) {
+      console.log("fetching first time data");
+      resetEntries();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
-      <div>
-        { projects.map(project => <div key={ project.id } onClick={ () => setProject(project.id) }>{ project.name }</div>) }
-      </div>
       {
-        projectIsSelected && <LogsTable
+        !projects && <Loader type="Audio" title="Loading..." floating size={100}/>
+      }
+      {
+        projects && <StyledOptionsPane
+              options={ options }
+              projects={ projects }
+              setSelectedProject={ projectId => setPartialOptions({filter: {projectId: projectId ?? ""}}) }
+              apply={ () => resetEntries() }
+          />
+      }
+      {
+        projects && showEntries && <StyledLogsTable
               entries={ entries }
               fetchNext={ fetchPageCallback }
               hasMore={ nextPageToken !== null }

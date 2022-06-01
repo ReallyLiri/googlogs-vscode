@@ -38,7 +38,7 @@ async function fetchDataAsync<TInMessage extends Message, TOutMessage extends Me
 
 export const fetchProjectsAsync = async (): Promise<ProjectsResultMessage> => {
   if (isBrowserDebug) {
-    await sleep(5);
+    await sleep(3);
     return {type: MessageType.PROJECTS_RESULT, projects: MOCK_PROJECTS};
   }
   return await fetchDataAsync<FetchProjectsMessage, ProjectsResultMessage>(

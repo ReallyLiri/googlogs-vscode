@@ -1,24 +1,33 @@
 import InfiniteScroll from "react-infinite-scroll-component";
 import React from "react";
 import { google } from "@google-cloud/logging/build/protos/protos";
+import styled from "styled-components";
 import ILogEntry = google.logging.v2.ILogEntry;
+import Loader from "./Loader";
+
+const TableHeight = window.innerHeight - 184;
+
+const Wrapper = styled.div<{isEmpty: boolean}>`
+  height: ${({isEmpty}) => isEmpty ? 64 : TableHeight}px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column-reverse;
+`;
 
 type LogsTableProps = {
+  className?: string,
   entries: ILogEntry[],
   fetchNext: () => Promise<void>,
   hasMore: boolean
 };
 
-export const LogsTable = ({entries, fetchNext, hasMore}: LogsTableProps) =>
-  (
-    <div
+export const LogsTable = ({className, entries, fetchNext, hasMore}: LogsTableProps) => {
+  let isEmpty = entries.length === 0;
+  return (
+    <Wrapper
       id="scrollableDiv"
-      style={ {
-        height: 100,
-        overflow: 'auto',
-        display: 'flex',
-        flexDirection: 'column-reverse',
-      } }
+      className={ className }
+      isEmpty={ isEmpty }
     >
       <InfiniteScroll
         dataLength={ entries.length }
@@ -26,7 +35,7 @@ export const LogsTable = ({entries, fetchNext, hasMore}: LogsTableProps) =>
         style={ {display: "flex", flexDirection: "column-reverse"} }
         inverse
         hasMore={ hasMore }
-        loader={ <h4>Loading...</h4> }
+        loader={ <Loader type="Grid" floating={ isEmpty } size={isEmpty ? 64 : 32}/> }
         scrollableTarget="scrollableDiv"
       >
         { entries.map((entry, index) => (
@@ -35,6 +44,6 @@ export const LogsTable = ({entries, fetchNext, hasMore}: LogsTableProps) =>
           </div>
         )) }
       </InfiniteScroll>
-    </div>
+    </Wrapper>
   );
-
+};
