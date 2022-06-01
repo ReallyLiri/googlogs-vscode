@@ -2,18 +2,20 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { GoogleProject } from "../common/googleProject";
 import { getDefaultOptions, Options } from "../data/options";
 import { fetchPageAsync, fetchProjectsAsync, isBrowserDebug } from "../data/fetchData";
-import InfiniteScroll from "react-infinite-scroll-component";
 import { MessageType } from "../common/messageType";
 import { google } from "@google-cloud/logging/build/protos/protos";
+import styled from "styled-components";
+import { LogsTable } from "./LogsTable";
 import ILogEntry = google.logging.v2.ILogEntry;
+
 
 
 export const App = () => {
   const [options, setOptions] = isBrowserDebug
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     ? useState<Options>(getDefaultOptions(""))
     : [vscode.getState() || getDefaultOptions(""), vscode.setState];
   const [entries, setEntries] = useState<ILogEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [nextPageToken, setNextPageToken] = useState<string | null>();
   const [projects, setProjects] = useState<GoogleProject[]>([]);
   const projectIsSelected = options.filter.projectId.length > 0;
@@ -29,7 +31,7 @@ export const App = () => {
     }
     setOptions({...options, filter: {...options.filter, projectId}});
     resetEntries();
-  }, [setOptions, resetEntries]);
+  }, [options, setOptions, resetEntries]);
 
   useEffect(() => {
     if (projects.length > 0) {
@@ -48,7 +50,7 @@ export const App = () => {
         }
       })
       .catch(error => console.error(error));
-  }, [projects, setProjects]);
+  }, [projectIsSelected, projects, setProject, setProjects]);
 
   const fetchPageCallback = useCallback(async () => {
     const result = await fetchPageAsync({
@@ -62,11 +64,10 @@ export const App = () => {
 
   useEffect(() => {
     if (projectIsSelected && nextPageToken === undefined) {
+      // noinspection JSIgnoredPromiseFromCall
       fetchPageCallback();
     }
   }, [projectIsSelected, nextPageToken, fetchPageCallback]);
-
-  console.error(nextPageToken, "next")
 
   return (
     <>
@@ -74,31 +75,11 @@ export const App = () => {
         { projects.map(project => <div key={ project.id } onClick={ () => setProject(project.id) }>{ project.name }</div>) }
       </div>
       {
-        projectIsSelected && <div
-              id="scrollableDiv"
-              style={ {
-                height: 100,
-                overflow: 'auto',
-                display: 'flex',
-                flexDirection: 'column-reverse',
-              } }
-          >
-              <InfiniteScroll
-                  dataLength={ entries.length }
-                  next={ fetchPageCallback }
-                  style={ {display: "flex", flexDirection: "column-reverse"} }
-                  inverse
-                  hasMore={ nextPageToken !== null }
-                  loader={ <h4>Loading...</h4> }
-                  scrollableTarget="scrollableDiv"
-              >
-                { entries.map((entry, index) => (
-                  <div key={ index }>
-                    { JSON.stringify(entry) }
-                  </div>
-                )) }
-              </InfiniteScroll>
-          </div>
+        projectIsSelected && <LogsTable
+              entries={ entries }
+              fetchNext={ fetchPageCallback }
+              hasMore={ nextPageToken !== null }
+          />
       }
     </>
   );
