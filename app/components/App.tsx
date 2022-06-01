@@ -52,10 +52,10 @@ export const App = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchPageCallback = useCallback(async () => {
+  const fetchPageCallback = useCallback(async (isClean: boolean = false) => {
     const result = await fetchPageAsync({
       type: MessageType.FETCH_PAGE,
-      pageToken: nextPageToken || null,
+      pageToken: isClean ? null : nextPageToken || null,
       ...options
     });
     setNextPageToken(result.nextPageToken);
@@ -69,7 +69,7 @@ export const App = () => {
     if (projectIsSelected) {
       console.log("making call for first page");
       // noinspection JSIgnoredPromiseFromCall
-      fetchPageCallback();
+      fetchPageCallback(true);
       setShowEntries(true);
     }
   }, [projectIsSelected, setEntries, setNextPageToken, fetchPageCallback]);
