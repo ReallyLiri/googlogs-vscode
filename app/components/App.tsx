@@ -1,15 +1,18 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Entry } from "@google-cloud/logging";
 import { GoogleProject } from "../common/googleProject";
-import { getDefaultOptions } from "../data/options";
-import { fetchPageAsync, fetchProjectsAsync } from "../data/fetchData";
+import { getDefaultOptions, Options } from "../data/options";
+import { fetchPageAsync, fetchProjectsAsync, isBrowserDebug } from "../data/fetchData";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { MessageType } from "../common/messageType";
+import { google } from "@google-cloud/logging/build/protos/protos";
+import ILogEntry = google.logging.v2.ILogEntry;
 
 
 export const App = () => {
-  const [options, setOptions] = [vscode.getState() || getDefaultOptions(""), vscode.setState];
-  const [entries, setEntries] = useState<Entry[]>([]);
+  const [options, setOptions] = isBrowserDebug
+    ? useState<Options>(getDefaultOptions(""))
+    : [vscode.getState() || getDefaultOptions(""), vscode.setState];
+  const [entries, setEntries] = useState<ILogEntry[]>([]);
   const [nextPageToken, setNextPageToken] = useState<string | null>();
   const [projects, setProjects] = useState<GoogleProject[]>([]);
   const projectIsSelected = options.filter.projectId.length > 0;
