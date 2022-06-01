@@ -13,6 +13,7 @@ export const App = () => {
     ? useState<Options>(getDefaultOptions(""))
     : [vscode.getState() || getDefaultOptions(""), vscode.setState];
   const [entries, setEntries] = useState<ILogEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [nextPageToken, setNextPageToken] = useState<string | null>();
   const [projects, setProjects] = useState<GoogleProject[]>([]);
   const projectIsSelected = options.filter.projectId.length > 0;
@@ -59,6 +60,14 @@ export const App = () => {
     setEntries(currentEntries => [...currentEntries, ...result.entries]);
   }, [options, nextPageToken]);
 
+  useEffect(() => {
+    if (projectIsSelected && nextPageToken === undefined) {
+      fetchPageCallback();
+    }
+  }, [projectIsSelected, nextPageToken, fetchPageCallback]);
+
+  console.error(nextPageToken, "next")
+
   return (
     <>
       <div>
@@ -68,7 +77,7 @@ export const App = () => {
         projectIsSelected && <div
               id="scrollableDiv"
               style={ {
-                height: 300,
+                height: 100,
                 overflow: 'auto',
                 display: 'flex',
                 flexDirection: 'column-reverse',
@@ -77,9 +86,9 @@ export const App = () => {
               <InfiniteScroll
                   dataLength={ entries.length }
                   next={ fetchPageCallback }
-                  style={ {display: 'flex', flexDirection: 'column-reverse', height: 500} }
+                  style={ {display: "flex", flexDirection: "column-reverse"} }
                   inverse
-                  hasMore={ true }
+                  hasMore={ nextPageToken !== null }
                   loader={ <h4>Loading...</h4> }
                   scrollableTarget="scrollableDiv"
               >
