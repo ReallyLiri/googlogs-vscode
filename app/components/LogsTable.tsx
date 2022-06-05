@@ -6,7 +6,7 @@ import Loader from "./Loader";
 import ILogEntry = google.logging.v2.ILogEntry;
 import { COLOR_MAIN } from "../style";
 
-const TableHeight = window.innerHeight - 184;
+const TableHeight = window.innerHeight - 320;
 
 const Wrapper = styled.div<{ isEmpty: boolean }>`
   height: ${ ({isEmpty}) => isEmpty ? 64 : TableHeight }px;
@@ -51,7 +51,7 @@ export const LogsTable = ({className, entries, fetchNext, hasMore}: LogsTablePro
           >
             { entries.map((entry, index) => (
               <div key={ index }>
-                { JSON.stringify(entry) }
+                { index + ") " + JSON.stringify(entry) }
               </div>
             )) }
           </InfiniteScroll>

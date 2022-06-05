@@ -34,7 +34,7 @@ async function handleMessage(panel: vscode.WebviewPanel, message: Message, stora
     case MessageType.OPTIONS_RESULT:
       await fetchAndPostDataAsync(panel, async () => {
         await storage.setValue(OPTIONS_KEY, (message as OptionsResultMessage).options);
-        return {type: MessageType.ACK};
+        return { type: MessageType.ACK };
       });
       break;
     default:
@@ -119,12 +119,12 @@ export class ViewLoader {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Googelogs</title>
         </head>
-        <body>
+        <body style="background-color: #212121; color: #d4d4d4; font-size: 13px; overflow-y: hidden; font-family: Menlo,Monaco,monospace">
           <div id="root"></div>
           <script>
             const vscode = acquireVsCodeApi();
           </script>
-          <script src="${ bundleScriptPath }"></script>
+          <script src="${bundleScriptPath}"></script>
         </body>
       </html>
     `;
