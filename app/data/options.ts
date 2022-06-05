@@ -4,7 +4,7 @@ export const getDefaultOptions = (projectId: string): Options => ({
   filter: {
     projectId: projectId
   },
-  pageSize: 20
+  pageSize: 100
 });
 
 export type Options = {

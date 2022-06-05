@@ -11,12 +11,14 @@ import styled from "styled-components";
 import { OptionsResultMessage, ProjectsResultMessage } from "../common/message";
 import ILogEntry = google.logging.v2.ILogEntry;
 
+const MARGIN = 8;
+
 const StyledOptionsPane = styled(OptionsPane)`
-  margin: 8px 0 8px 8px;
+  margin: ${ MARGIN }px;
 `;
 
 const StyledLogsTable = styled(LogsTable)`
-  margin: 8px 0 8px 8px;
+  margin: ${ MARGIN }px;
 `;
 
 export const App = () => {

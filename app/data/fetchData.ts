@@ -51,7 +51,7 @@ export const fetchProjectsAsync = async (): Promise<ProjectsResultMessage> => {
 export const fetchPageAsync = async (message: FetchPageMessage): Promise<PageResultMessage> => {
   if (isBrowserDebug) {
     await sleep(5);
-    return {type: MessageType.PAGE_RESULT, nextPageToken: "token", entries: MOCK_LOGS};
+    return {type: MessageType.PAGE_RESULT, nextPageToken: null, entries: []};
   }
   return await fetchDataAsync<FetchPageMessage, PageResultMessage>(
     message,

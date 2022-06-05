@@ -17,7 +17,6 @@ const Wrapper = styled.div`
   ${ Box };
   background-color: ${ COLOR_LIGHT };
   padding: ${ MARGIN / 2 }px;
-  padding-right: ${ PROJECT_OPTION_WIDTH };
 `;
 
 const ApplyButton = styled.div<{ disabled: boolean }>`

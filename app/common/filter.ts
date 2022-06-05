@@ -14,4 +14,4 @@ export type LogFilter = {
   severities?: LogSeverity[],
   untilAgo?: moment.Duration,
   fromAgo?: moment.Duration
-}
+};
