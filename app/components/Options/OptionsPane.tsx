@@ -2,10 +2,10 @@ import React from "react";
 import Select from "react-select";
 import { GoogleProject } from "../../common/googleProject";
 import { COLOR_DARK, COLOR_LIGHT, COLOR_MAIN } from "../../style";
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 import { Options } from "../../data/options";
 import { LogSeverity, SeverityToColor } from "../../common/filter";
-import { Box, SELECT_STYLES } from "./Styles";
+import { Box, OPTION_WIDTH, SELECT_STYLES } from "./Styles";
 import { DurationPicker } from "./DurationPicker";
 
 const MARGIN = 32;
@@ -14,7 +14,7 @@ const Wrapper = styled.div`
   ${ Box };
   background-color: ${ COLOR_LIGHT };
   padding: ${ MARGIN / 2 }px;
-  min-width: calc(100% - ${MARGIN*1.5}px);
+  min-width: calc(100% - ${ MARGIN * 1.5 }px);
   width: fit-content;
 `;
 
@@ -32,11 +32,11 @@ const ApplyButton = styled.div<{ disabled: boolean }>`
   color: ${ ({disabled}) => disabled ? COLOR_DARK : "White" };
 `;
 
-const Line = styled.div<{isFirst?: boolean}>`
+const Line = styled.div<{ isFirst?: boolean }>`
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  margin-top: ${({isFirst}) => isFirst ? 0 : MARGIN}px;
+  margin-top: ${ ({isFirst}) => isFirst ? 0 : MARGIN }px;
 `;
 
 const Title = styled.span<{ isFirst?: boolean }>`
@@ -45,6 +45,14 @@ const Title = styled.span<{ isFirst?: boolean }>`
   color: ${ COLOR_MAIN };
   padding-right: ${ MARGIN / 2 }px;
   padding-left: ${ ({isFirst}) => isFirst ? 0 : MARGIN / 2 }px;
+`;
+
+const StyledInput = styled.input`
+  ${ Box };
+  height: 32px;
+  padding: 8px;
+  width: ${OPTION_WIDTH * 3}px;
+  text-align: left;
 `;
 
 const formatProjectSelectOption = (project: GoogleProject) =>
@@ -118,6 +126,14 @@ function OptionsPane({
         selectedValue={ options.filter.untilAgo }
         onChange={ value => setPartialOptions({filter: {untilAgo: value}}) }
         unsetLabel="now"/>
+    </Line>
+    <Line>
+      <Title isFirst>Query:</Title>
+      <StyledInput
+        type="text"
+        defaultValue={ options.filter.text }
+        onChange={ e => setPartialOptions({filter: {text: e.target.value}}) }
+      />
     </Line>
     <ApplyButton disabled={ !canApply } onClick={ () => canApply && apply() } title={ canApply ? "Apply" : "Disabled - Select all required options" }>
       Apply / Reload
