@@ -1,4 +1,3 @@
-import * as moment from "moment";
 import { COLOR_DEBUG, COLOR_ERROR, COLOR_INFO, COLOR_WARNING } from "../style";
 
 export enum LogSeverity {
@@ -9,10 +8,25 @@ export enum LogSeverity {
 }
 
 export const SeverityToColor: Record<LogSeverity, string> = {
-  DEBUG: COLOR_DEBUG,
-  ERROR: COLOR_ERROR,
-  INFO: COLOR_INFO,
-  WARNING: COLOR_WARNING
+  [LogSeverity.DEBUG]: COLOR_DEBUG,
+  [LogSeverity.ERROR]: COLOR_ERROR,
+  [LogSeverity.INFO]: COLOR_INFO,
+  [LogSeverity.WARNING]: COLOR_WARNING
+};
+
+export enum DurationUnits {
+  none = "none",
+  year = "year",
+  month = "month",
+  week = "week",
+  day = "day",
+  hour = "hour",
+  minute = "minute"
+}
+
+export type Duration = {
+  value: number,
+  unit: DurationUnits,
 };
 
 export type LogFilter = {
@@ -20,6 +34,6 @@ export type LogFilter = {
   containerNames?: string[],
   text?: string,
   severities?: LogSeverity[],
-  untilAgo?: moment.Duration,
-  fromAgo?: moment.Duration
+  untilAgo?: Duration,
+  fromAgo?: Duration
 };

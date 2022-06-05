@@ -6,7 +6,7 @@ import { MessageType } from "../common/messageType";
 import { google } from "@google-cloud/logging/build/protos/protos";
 import { LogsTable } from "./LogsTable";
 import Loader from "./Loader";
-import OptionsPane from "./OptionsPane";
+import OptionsPane from "./Options/OptionsPane";
 import styled from "styled-components";
 import { OptionsResultMessage, ProjectsResultMessage } from "../common/message";
 import ILogEntry = google.logging.v2.ILogEntry;

@@ -1,8 +1,10 @@
-import { LogFilter } from "../common/filter";
+import { DurationUnits, LogFilter } from "../common/filter";
 
 export const getDefaultOptions = (projectId: string): Options => ({
   filter: {
-    projectId: projectId
+    projectId: projectId,
+    fromAgo: {value: 0, unit: DurationUnits.none},
+    untilAgo: {value: 0, unit: DurationUnits.none},
   },
   pageSize: 100
 });

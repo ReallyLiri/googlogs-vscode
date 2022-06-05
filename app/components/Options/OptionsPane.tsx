@@ -1,23 +1,21 @@
 import React from "react";
-import Select, { CSSObjectWithLabel } from "react-select";
-import { GoogleProject } from "../common/googleProject";
-import { COLOR_DARK, COLOR_LIGHT, COLOR_MAIN } from "../style";
+import Select from "react-select";
+import { GoogleProject } from "../../common/googleProject";
+import { COLOR_DARK, COLOR_LIGHT, COLOR_MAIN } from "../../style";
 import styled, { css } from "styled-components";
-import { Options } from "../data/options";
-import { LogSeverity, SeverityToColor } from "../common/filter";
+import { Options } from "../../data/options";
+import { LogSeverity, SeverityToColor } from "../../common/filter";
+import { Box, SELECT_STYLES } from "./Styles";
+import { DurationPicker } from "./DurationPicker";
 
-const OPTION_WIDTH = 360;
 const MARGIN = 32;
-
-const Box = css`
-  border-radius: 4px;
-  border: 1px solid hsl(0, 0%, 80%);
-`;
 
 const Wrapper = styled.div`
   ${ Box };
   background-color: ${ COLOR_LIGHT };
   padding: ${ MARGIN / 2 }px;
+  min-width: calc(100% - ${MARGIN*1.5}px);
+  width: fit-content;
 `;
 
 const ApplyButton = styled.div<{ disabled: boolean }>`
@@ -34,26 +32,25 @@ const ApplyButton = styled.div<{ disabled: boolean }>`
   color: ${ ({disabled}) => disabled ? COLOR_DARK : "White" };
 `;
 
-const Line = styled.div`
+const Line = styled.div<{isFirst?: boolean}>`
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  margin-top: ${({isFirst}) => isFirst ? 0 : MARGIN}px;
 `;
 
-const Title = styled.span<{isFirst?: boolean}>`
+const Title = styled.span<{ isFirst?: boolean }>`
   font-size: 16px;
   font-weight: bold;
   color: ${ COLOR_MAIN };
   padding-right: ${ MARGIN / 2 }px;
-  padding-left: ${({isFirst}) => isFirst ? 0 : MARGIN/2}px;
+  padding-left: ${ ({isFirst}) => isFirst ? 0 : MARGIN / 2 }px;
 `;
 
-const SELECT_STYLES = {
-  control: (styles: CSSObjectWithLabel) => ({...styles, width: OPTION_WIDTH}),
-  menu: (styles: CSSObjectWithLabel) => ({...styles, width: OPTION_WIDTH}),
-  singleValue: (styles: CSSObjectWithLabel) => ({...styles, color: COLOR_MAIN}),
-  option: (styles: CSSObjectWithLabel) => ({...styles, color: COLOR_DARK}),
-};
+const formatProjectSelectOption = (project: GoogleProject) =>
+  ({value: project.id, label: project.name});
+const formatSelectOption = <T extends string>(selectOption: T, display?: string) =>
+  ({value: selectOption, label: display ? display : selectOption as string});
 
 type OptionsPaneProps = {
   className?: string,
@@ -62,9 +59,6 @@ type OptionsPaneProps = {
   setPartialOptions: (partialOptions: Partial<Options>) => void;
   apply: () => void;
 };
-
-const formatProjectSelectOption = (project: GoogleProject) => ({value: project.id, label: project.name});
-const formatSelectOption = <T extends string>(selectOption: T) => ({value: selectOption, label: selectOption as string});
 
 function OptionsPane({
                        className,
@@ -78,7 +72,7 @@ function OptionsPane({
 
 
   return <Wrapper className={ className }>
-    <Line>
+    <Line isFirst>
       <Title isFirst>Project:</Title>
       <Select
         isClearable
@@ -100,7 +94,7 @@ function OptionsPane({
             color: COLOR_DARK,
             backgroundColor: isFocused ? SeverityToColor[data.value] : styles.backgroundColor
           }),
-          multiValueRemove: (styles, { data }) => ({
+          multiValueRemove: (styles, {data}) => ({
             ...styles,
             ':hover': {
               backgroundColor: SeverityToColor[data.value],
@@ -108,10 +102,22 @@ function OptionsPane({
             },
           })
         } }
-        options={ Object.values(LogSeverity).map(formatSelectOption) }
-        value={ options.filter.severities?.map(formatSelectOption) }
+        options={ Object.values(LogSeverity).map(v => formatSelectOption(v)) }
+        value={ options.filter.severities?.map(v => formatSelectOption(v)) }
         onChange={ selected => setPartialOptions({filter: {severities: selected.map(tup => tup.value)}}) }
       />
+    </Line>
+    <Line>
+      <Title isFirst>Since:</Title>
+      <DurationPicker
+        selectedValue={ options.filter.fromAgo }
+        onChange={ value => setPartialOptions({filter: {fromAgo: value}}) }
+        unsetLabel="the beginning of time"/>
+      <Title>Until:</Title>
+      <DurationPicker
+        selectedValue={ options.filter.untilAgo }
+        onChange={ value => setPartialOptions({filter: {untilAgo: value}}) }
+        unsetLabel="now"/>
     </Line>
     <ApplyButton disabled={ !canApply } onClick={ () => canApply && apply() } title={ canApply ? "Apply" : "Disabled - Select all required options" }>
       Apply / Reload

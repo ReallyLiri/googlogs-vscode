@@ -7,3 +7,4 @@ export const COLOR_DEBUG = "#EAEAEA";
 export const COLOR_INFO = "#a3bae1";
 export const COLOR_WARNING = "#e1dda3";
 export const COLOR_ERROR = "#d295ab";
+

@@ -1,6 +1,6 @@
 import { getAuthTokenAsync } from "./auth";
 import { FetchPageMessage, PageResultMessage } from "../../app/common/message";
-import { LogFilter } from "../../app/common/filter";
+import { Duration, LogFilter } from "../../app/common/filter";
 import * as moment from "moment";
 import { MessageType } from "../../app/common/messageType";
 import { GetEntriesRequest } from "@google-cloud/logging/build/src/log";
@@ -13,9 +13,10 @@ function orValues(fieldName: string, values: string[]): string {
   return values.map(value => `${ fieldName }="${ value }"`).join(" OR ");
 }
 
-function durationAgoToTimestamp(duration: moment.Duration) {
+function durationAgoToTimestamp(duration: Duration) {
   const now = moment.utc();
-  const target = now.subtract(duration);
+  const momentDuration = moment.duration(duration.value, duration.unit);
+  const target = now.subtract(momentDuration);
   return target.format();
 }
 
