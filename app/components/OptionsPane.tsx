@@ -1,11 +1,12 @@
 import React from "react";
-import Select from "react-select";
+import Select, { CSSObjectWithLabel } from "react-select";
 import { GoogleProject } from "../common/googleProject";
 import { COLOR_DARK, COLOR_LIGHT, COLOR_MAIN } from "../style";
 import styled, { css } from "styled-components";
 import { Options } from "../data/options";
+import { LogSeverity, SeverityToColor } from "../common/filter";
 
-const PROJECT_OPTION_WIDTH = 320;
+const OPTION_WIDTH = 360;
 const MARGIN = 32;
 
 const Box = css`
@@ -39,39 +40,77 @@ const Line = styled.div`
   align-items: center;
 `;
 
-const Title = styled.span`
+const Title = styled.span<{isFirst?: boolean}>`
   font-size: 16px;
   font-weight: bold;
   color: ${ COLOR_MAIN };
   padding-right: ${ MARGIN / 2 }px;
+  padding-left: ${({isFirst}) => isFirst ? 0 : MARGIN/2}px;
 `;
+
+const SELECT_STYLES = {
+  control: (styles: CSSObjectWithLabel) => ({...styles, width: OPTION_WIDTH}),
+  menu: (styles: CSSObjectWithLabel) => ({...styles, width: OPTION_WIDTH}),
+  singleValue: (styles: CSSObjectWithLabel) => ({...styles, color: COLOR_MAIN}),
+  option: (styles: CSSObjectWithLabel) => ({...styles, color: COLOR_DARK}),
+};
 
 type OptionsPaneProps = {
   className?: string,
   options: Options
   projects: GoogleProject[],
-  setSelectedProject: (project: string | undefined) => void;
+  setPartialOptions: (partialOptions: Partial<Options>) => void;
   apply: () => void;
 };
 
-function OptionsPane({className, options, projects, setSelectedProject, apply}: OptionsPaneProps) {
-  const canApply = options.filter.projectId.length > 0;
-  const selected = projects.find(project => project.id === options.filter.projectId);
+const formatProjectSelectOption = (project: GoogleProject) => ({value: project.id, label: project.name});
+const formatSelectOption = <T extends string>(selectOption: T) => ({value: selectOption, label: selectOption as string});
+
+function OptionsPane({
+                       className,
+                       options,
+                       projects,
+                       setPartialOptions,
+                       apply
+                     }: OptionsPaneProps) {
+  const canApply = options.filter.projectId && options.filter.projectId.length > 0;
+  const selectedProject = projects.find(project => project.id === options.filter.projectId);
+
+
   return <Wrapper className={ className }>
     <Line>
-      <Title>Project:</Title>
+      <Title isFirst>Project:</Title>
       <Select
         isClearable
         isSearchable
-        onChange={ selected => setSelectedProject(selected?.value) }
-        options={ projects.map(project => ({value: project.id, label: project.name})) }
-        value={ selected ? {value: selected.id, label: selected.name} : undefined }
+        styles={ SELECT_STYLES }
+        onChange={ selected => setPartialOptions({filter: {projectId: selected?.value ?? ""}}) }
+        options={ projects.map(formatProjectSelectOption) }
+        value={ selectedProject ? formatProjectSelectOption(selectedProject) : undefined }
+      />
+      <Title>Severities:</Title>
+      <Select
+        isClearable
+        isSearchable
+        isMulti
         styles={ {
-          control: (styles) => ({...styles, width: PROJECT_OPTION_WIDTH}),
-          menu: (styles) => ({...styles, width: PROJECT_OPTION_WIDTH}),
-          singleValue: (styles, {data}) => ({...styles, color: COLOR_MAIN}),
-          option: (styles, {data}) => ({...styles, color: COLOR_DARK}),
+          ...SELECT_STYLES,
+          option: (styles, {data, isFocused}) => ({
+            ...styles,
+            color: COLOR_DARK,
+            backgroundColor: isFocused ? SeverityToColor[data.value] : styles.backgroundColor
+          }),
+          multiValueRemove: (styles, { data }) => ({
+            ...styles,
+            ':hover': {
+              backgroundColor: SeverityToColor[data.value],
+              color: COLOR_DARK,
+            },
+          })
         } }
+        options={ Object.values(LogSeverity).map(formatSelectOption) }
+        value={ options.filter.severities?.map(formatSelectOption) }
+        onChange={ selected => setPartialOptions({filter: {severities: selected.map(tup => tup.value)}}) }
       />
     </Line>
     <ApplyButton disabled={ !canApply } onClick={ () => canApply && apply() } title={ canApply ? "Apply" : "Disabled - Select all required options" }>

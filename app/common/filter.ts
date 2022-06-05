@@ -1,4 +1,5 @@
 import * as moment from "moment";
+import { COLOR_DEBUG, COLOR_ERROR, COLOR_INFO, COLOR_WARNING } from "../style";
 
 export enum LogSeverity {
   DEBUG = "DEBUG",
@@ -7,8 +8,15 @@ export enum LogSeverity {
   ERROR = "ERROR"
 }
 
+export const SeverityToColor: Record<LogSeverity, string> = {
+  DEBUG: COLOR_DEBUG,
+  ERROR: COLOR_ERROR,
+  INFO: COLOR_INFO,
+  WARNING: COLOR_WARNING
+};
+
 export type LogFilter = {
-  projectId: string,
+  projectId?: string,
   containerNames?: string[],
   text?: string,
   severities?: LogSeverity[],

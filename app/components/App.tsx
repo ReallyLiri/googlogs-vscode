@@ -26,7 +26,7 @@ export const App = () => {
   const [entries, setEntries] = useState<ILogEntry[]>([]);
   const [nextPageToken, setNextPageToken] = useState<string | null>();
   const [projects, setProjects] = useState<GoogleProject[]>();
-  const projectIsSelected = options.filter.projectId.length > 0;
+  const projectIsSelected = !!options.filter.projectId;
   const [showEntries, setShowEntries] = useState(projectIsSelected);
 
   const setPartialOptions = useCallback((newOptions: Partial<Options>, persist: boolean = true) => {
@@ -46,7 +46,7 @@ export const App = () => {
       const googleProjects = (results[1] as ProjectsResultMessage).projects;
       setProjects(googleProjects);
       setPartialOptions(loadedOptions, false);
-      if (loadedOptions.filter.projectId.length > 0) {
+      if (loadedOptions.filter.projectId) {
         resetEntries();
       }
     })
@@ -85,7 +85,7 @@ export const App = () => {
         projects && <StyledOptionsPane
               options={ options }
               projects={ projects }
-              setSelectedProject={ projectId => setPartialOptions({filter: {projectId: projectId ?? ""}}) }
+              setPartialOptions={ partialOptions => setPartialOptions(partialOptions) }
               apply={ () => resetEntries() }
           />
       }
