@@ -1,6 +1,6 @@
 import { getAuthTokenAsync } from "./auth";
 import { FetchPageMessage, PageResultMessage } from "../../app/common/message";
-import { Duration, LogFilter } from "../../app/common/filter";
+import { Duration, DurationUnits, LogFilter } from "../../app/common/filter";
 import * as moment from "moment";
 import { MessageType } from "../../app/common/messageType";
 import { GetEntriesRequest } from "@google-cloud/logging/build/src/log";
@@ -15,7 +15,7 @@ function orValues(fieldName: string, values: string[]): string {
 
 function durationAgoToTimestamp(duration: Duration) {
   const now = moment.utc();
-  const momentDuration = moment.duration(duration.value, duration.unit);
+  const momentDuration = moment.duration(duration.value, duration.unit as any);
   const target = now.subtract(momentDuration);
   return target.format();
 }
@@ -32,11 +32,11 @@ function buildFilterText(filter: LogFilter): string {
   if (severities && severities.length > 0) {
     parts.push(orValues("severity", severities));
   }
-  if (fromAgo) {
-    parts.push(`timestamp>="${ durationAgoToTimestamp(fromAgo) }"`)
+  if (fromAgo && fromAgo.unit !== DurationUnits.none) {
+    parts.push(`timestamp>="${ durationAgoToTimestamp(fromAgo) }"`);
   }
-  if (untilAgo) {
-    parts.push(`timestamp<="${ durationAgoToTimestamp(untilAgo) }"`)
+  if (untilAgo && untilAgo.unit !== DurationUnits.none) {
+    parts.push(`timestamp<="${ durationAgoToTimestamp(untilAgo) }"`);
   }
   return parts.join(" AND ");
 }
@@ -60,6 +60,7 @@ export async function readLogsPageAsync(request: FetchPageMessage): Promise<Page
       },
       data: JSON.stringify(requestBody)
     };
+    console.log(config);
 
     const response = await axios.request(config);
     if (response.status !== httpConstants.HTTP_STATUS_OK) {

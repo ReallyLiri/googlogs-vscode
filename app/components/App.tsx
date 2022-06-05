@@ -28,6 +28,7 @@ export const App = () => {
   const [projects, setProjects] = useState<GoogleProject[]>();
   const projectIsSelected = !!options.filter.projectId;
   const [showEntries, setShowEntries] = useState(projectIsSelected);
+  const [shouldReset, setShouldReset] = useState<boolean>(false);
 
   const setPartialOptions = useCallback((newOptions: Partial<Options>, persist: boolean = true) => {
     console.log("setting partial options", newOptions);
@@ -46,8 +47,9 @@ export const App = () => {
       const googleProjects = (results[1] as ProjectsResultMessage).projects;
       setProjects(googleProjects);
       setPartialOptions(loadedOptions, false);
+      console.log("initial read done", loadedOptions, googleProjects);
       if (loadedOptions.filter.projectId) {
-        resetEntries();
+        setShouldReset(true);
       }
     })
       .catch(error => console.error(error));
@@ -68,13 +70,17 @@ export const App = () => {
     console.log("resetting entries...");
     setEntries([]);
     setNextPageToken(undefined);
-    if (projectIsSelected) {
-      console.log("making call for first page");
-      // noinspection JSIgnoredPromiseFromCall
-      fetchPageCallback(true);
-      setShowEntries(true);
+    setShowEntries(true);
+    // noinspection JSIgnoredPromiseFromCall
+    fetchPageCallback(true);
+  }, [setEntries, setNextPageToken, fetchPageCallback]);
+
+  useEffect(() => {
+    if (shouldReset) {
+      setShouldReset(false);
+      resetEntries();
     }
-  }, [projectIsSelected, setEntries, setNextPageToken, fetchPageCallback]);
+  }, [shouldReset, resetEntries]);
 
   return (
     <>

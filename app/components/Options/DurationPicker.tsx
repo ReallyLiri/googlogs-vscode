@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Box, OPTION_WIDTH, SELECT_STYLES } from "./Styles";
 import { Duration, DurationUnits } from "../../common/filter";
 import styled from "styled-components";
-import { COLOR_DARK, COLOR_MAIN } from "../../style";
+import { COLOR_DARK } from "../../style";
 
 const StyledInput = styled.input`
   ${ Box };
@@ -42,7 +42,11 @@ export function DurationPicker({selectedValue, onChange, unsetLabel}: DurationPi
       unit !== DurationUnits.none && <StyledInput
             type="text"
             defaultValue={ value }
-            onChange={ e => setValue(toInt(e.target.value)) }
+            onChange={ e => {
+              const newValue = toInt(e.target.value);
+              setValue(newValue);
+              onChange(newValue && unit ? {unit: unit, value: newValue} : undefined);
+            } }
             onKeyPress={ (event) => {
               if (!/\d/.test(event.key)) {
                 event.preventDefault();
