@@ -8,6 +8,7 @@ import axios, { AxiosRequestConfig } from "axios";
 import { constants as httpConstants } from "http2";
 import { google } from "@google-cloud/logging/build/protos/protos";
 import IListLogEntriesResponse = google.logging.v2.IListLogEntriesResponse;
+import { httpAsync } from "./client";
 
 function orValues(fieldName: string, values: string[]): string {
   return values.map(value => `${ fieldName }="${ value }"`).join(" OR ");
@@ -51,24 +52,15 @@ export async function readLogsPageAsync(request: FetchPageMessage): Promise<Page
       pageSize: request.pageSize,
       pageToken: request.pageToken ?? undefined,
     };
-    const config: AxiosRequestConfig = {
-      method: 'post',
-      url: 'https://logging.googleapis.com/v2/entries:list?alt=json',
-      headers: {
-        'Authorization': `Bearer ${ await getAuthTokenAsync() }`,
-        'Content-Type': 'application/json'
-      },
-      data: JSON.stringify(requestBody)
-    };
-    console.log(config);
+    const entriesResponse = await httpAsync<GetEntriesRequest, IListLogEntriesResponse>(
+      'https://logging.googleapis.com/v2/entries:list?alt=json',
+      'post',
+      requestBody
+    );
 
-    const response = await axios.request(config);
-    if (response.status !== httpConstants.HTTP_STATUS_OK) {
-      console.error("failed fetching logs", response);
-    } else {
-      const entriesResponses = response.data as IListLogEntriesResponse;
-      result.entries = entriesResponses.entries || [];
-      result.nextPageToken = result.entries.length === 0 ? null : entriesResponses.nextPageToken || null;
+    if (entriesResponse) {
+      result.entries = entriesResponse.entries || [];
+      result.nextPageToken = result.entries.length === 0 ? null : entriesResponse.nextPageToken || null;
     }
   } catch (e) {
     console.error("failed fetching logs", e);
