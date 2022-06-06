@@ -3,8 +3,12 @@ import React from "react";
 import { google } from "@google-cloud/logging/build/protos/protos";
 import styled from "styled-components";
 import Loader from "./Loader";
-import ILogEntry = google.logging.v2.ILogEntry;
 import { COLOR_MAIN } from "../style";
+import { LogSeverity, SeverityToColor } from "../common/filter";
+import ILogEntry = google.logging.v2.ILogEntry;
+import * as moment from "moment";
+// @ts-ignore
+import * as objectPath from "object-path";
 
 const TableHeight = window.innerHeight - 320;
 
@@ -20,6 +24,20 @@ const NoResults = styled.div`
   font-size: 16px;
   color: ${ COLOR_MAIN };
 `;
+
+const LogLine = styled.div<{ severity: LogSeverity }>`
+  color: ${ ({severity}) => SeverityToColor[severity] };
+  padding: 4px;
+  margin: 4px 0 0 4px;
+`;
+
+const LogContent = ({entry}: { entry: ILogEntry }) => {
+  const json = entry.jsonPayload!;
+  const stackTrace = objectPath.get(json, "e")?.replaceAll("\n", "<br>").replaceAll("\t", "&#9;");
+  return <>
+    { `${ moment.utc((entry.timestamp as string)).format("YYYY-MM-DD HH:mm:ss")} [${entry.severity}] ${objectPath.get(json, "caller")} ${JSON.stringify(objectPath.get(json, "mdc"))} - ${objectPath.get(json, "message")} - ${stackTrace}` }
+  </>;
+};
 
 type LogsTableProps = {
   className?: string,
@@ -50,9 +68,9 @@ export const LogsTable = ({className, entries, fetchNext, hasMore}: LogsTablePro
             scrollableTarget="scrollableDiv"
           >
             { entries.map((entry, index) => (
-              <div key={ index }>
-                { index + ") " + JSON.stringify(entry) }
-              </div>
+              <LogLine key={ index } severity={ entry.severity as LogSeverity }>
+                <LogContent entry={ entry }/>
+              </LogLine>
             )) }
           </InfiniteScroll>
       }
