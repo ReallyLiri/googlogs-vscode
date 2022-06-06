@@ -5,10 +5,10 @@ import styled from "styled-components";
 import Loader from "./Loader";
 import { COLOR_MAIN } from "../style";
 import { LogSeverity, SeverityToColor } from "../common/filter";
-import ILogEntry = google.logging.v2.ILogEntry;
 import * as moment from "moment";
 // @ts-ignore
 import * as objectPath from "object-path";
+import ILogEntry = google.logging.v2.ILogEntry;
 
 const TableHeight = window.innerHeight - 320;
 
@@ -31,12 +31,19 @@ const LogLine = styled.div<{ severity: LogSeverity }>`
   margin: 4px 0 0 4px;
 `;
 
+const MultilineText = styled.div`
+  white-space: pre;
+`;
+
 const LogContent = ({entry}: { entry: ILogEntry }) => {
   const json = entry.jsonPayload!;
-  const stackTrace = objectPath.get(json, "e")?.replaceAll("\n", "<br>").replaceAll("\t", "&#9;");
-  return <>
-    { `${ moment.utc((entry.timestamp as string)).format("YYYY-MM-DD HH:mm:ss")} [${entry.severity}] ${objectPath.get(json, "caller")} ${JSON.stringify(objectPath.get(json, "mdc"))} - ${objectPath.get(json, "message")} - ${stackTrace}` }
-  </>;
+  return <MultilineText>
+    { `${ moment.utc((entry.timestamp as string)).format("YYYY-MM-DD HH:mm:ss") } [${ entry.severity }] ${ objectPath.get(json, "caller") } ${ JSON.stringify(objectPath.get(json, "mdc")) }` }
+    -
+    { objectPath.get(json, "message") }
+    -
+    { objectPath.get(json, "e") }
+  </MultilineText>;
 };
 
 type LogsTableProps = {

@@ -7,7 +7,10 @@
     "jsx": "react",
     "sourceMap": true,
     "experimentalDecorators": true,
-    "lib": ["dom", "ES2015"],
+    "lib": [
+      "dom",
+      "es2021"
+    ],
     "strict": true
   }
 }
