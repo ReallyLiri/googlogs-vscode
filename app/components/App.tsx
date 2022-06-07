@@ -23,6 +23,7 @@ const StyledLogsTable = styled(LogsTable)`
 `;
 
 const StyledAnchor = styled.a`
+  margin: ${ MARGIN }px;
   color: ${ COLOR_LIGHT };
 `;
 

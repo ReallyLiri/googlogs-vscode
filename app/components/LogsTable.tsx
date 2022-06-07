@@ -13,7 +13,8 @@ import ILogEntry = google.logging.v2.ILogEntry;
 
 const Wrapper = styled.div<{ isEmpty: boolean, windowHeight: number }>`
   min-height: 64px;
-  height: ${ ({windowHeight}) => windowHeight - 340 }px;
+  height: fit-content;
+  max-height: ${ ({windowHeight}) => windowHeight - 340 }px;
   overflow: auto;
   display: flex;
   flex-direction: column-reverse;
@@ -69,7 +70,7 @@ export const LogsTable = ({className, entries, fetchNext, hasMore}: LogsTablePro
           : <InfiniteScroll
             dataLength={ entries.length }
             next={ fetchNext }
-            style={ {display: "flex", flexDirection: "column-reverse"} }
+            style={ {display: "flex", flexDirection: "column-reverse", paddingBottom: 8} }
             inverse
             hasMore={ hasMore }
             loader={ <Loader type="Grid" floating={ isEmpty } size={ isEmpty ? 64 : 32 }/> }
