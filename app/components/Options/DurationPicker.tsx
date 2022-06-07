@@ -1,22 +1,11 @@
 import Select, { CSSObjectWithLabel } from "react-select";
 import React, { useState } from "react";
-import { Box, OPTION_WIDTH, SELECT_STYLES } from "./Styles";
+import { OPTION_WIDTH, SELECT_STYLES } from "./Styles";
 import { Duration, DurationUnits } from "../../common/filter";
 import styled from "styled-components";
 import { COLOR_DARK } from "../../style";
+import NumberPicker from "./NumberPicker";
 
-const StyledInput = styled.input`
-  ${ Box };
-  height: 34px;
-  margin-right: 4px;
-  width: 64px;
-  text-align: center;
-`;
-
-const toInt = (num: string) => {
-  const asInt = parseInt(num);
-  return isNaN(asInt) ? undefined : asInt;
-};
 
 const AgoLabel = styled.span`
   font-size: 16px;
@@ -39,18 +28,11 @@ export function DurationPicker({selectedValue, onChange, unsetLabel}: DurationPi
   });
   return <>
     {
-      unit !== DurationUnits.none && <StyledInput
-            type="text"
-            defaultValue={ value }
-            onChange={ e => {
-              const newValue = toInt(e.target.value);
+      unit !== DurationUnits.none && <NumberPicker
+            value={ value }
+            setValue={ newValue => {
               setValue(newValue);
               onChange(newValue && unit ? {unit: unit, value: newValue} : undefined);
-            } }
-            onKeyPress={ (event) => {
-              if (!/\d/.test(event.key)) {
-                event.preventDefault();
-              }
             } }
         />
     }

@@ -3,11 +3,12 @@ import Select from "react-select";
 import { GoogleProject } from "../../common/googleProject";
 import { COLOR_DARK, COLOR_LIGHT, COLOR_MAIN } from "../../style";
 import styled, { css } from "styled-components";
-import { Options } from "../../data/options";
+import { DEFAULT_PAGE_SIZE, Options } from "../../data/options";
 import { LogSeverity, SeverityToColor } from "../../common/filter";
 import { Box, OPTION_WIDTH, SELECT_STYLES } from "./Styles";
 import { DurationPicker } from "./DurationPicker";
 import TagsInput from 'react-tagsinput';
+import NumberPicker from "./NumberPicker";
 
 const MARGIN = 16;
 
@@ -21,7 +22,6 @@ const Wrapper = styled.div`
 
 const ApplyButton = styled.div<{ disabled: boolean }>`
   ${ Box };
-  margin-top: ${ MARGIN }px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -208,9 +208,17 @@ function OptionsPane({
         onChange={ e => setPartialOptions({filter: {text: e.target.value}}) }
       />
     </Line>
-    <ApplyButton disabled={ !canApply } onClick={ () => canApply && apply() } title={ canApply ? "Apply" : "Disabled - Select all required options" }>
-      Apply / Reload
-    </ApplyButton>
+    <Line>
+      <ApplyButton disabled={ !canApply } onClick={ () => canApply && apply() } title={ canApply ? "Apply" : "Disabled - Select all required options" }>
+        Apply / Reload
+      </ApplyButton>
+      <Filler/>
+      <Title>Page size:</Title>
+      <NumberPicker
+        value={ options.pageSize }
+        setValue={ value => setPartialOptions({pageSize: value ?? DEFAULT_PAGE_SIZE}) }
+      />
+    </Line>
   </Wrapper>;
 }
 
