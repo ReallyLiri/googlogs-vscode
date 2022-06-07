@@ -33,6 +33,7 @@ export interface PageResultMessage extends Message {
   type: MessageType.PAGE_RESULT;
   entries: ILogEntry[];
   nextPageToken: string | null;
+  webUrl: string;
 }
 
 export interface FetchProjectsMessage extends Message {

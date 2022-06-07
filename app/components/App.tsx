@@ -10,6 +10,7 @@ import OptionsPane from "./Options/OptionsPane";
 import styled from "styled-components";
 import { OptionsResultMessage, ProjectsResultMessage } from "../common/message";
 import ILogEntry = google.logging.v2.ILogEntry;
+import { COLOR_LIGHT } from "../style";
 
 const MARGIN = 8;
 
@@ -21,6 +22,10 @@ const StyledLogsTable = styled(LogsTable)`
   margin: ${ MARGIN }px;
 `;
 
+const StyledAnchor = styled.a`
+  color: ${ COLOR_LIGHT };
+`;
+
 export const App = () => {
   const [options, setOptions] = useState<Options>(getDefaultOptions(""));
   const [entries, setEntries] = useState<ILogEntry[]>([]);
@@ -29,6 +34,7 @@ export const App = () => {
   const projectIsSelected = !!options.filter.projectId;
   const [showEntries, setShowEntries] = useState(projectIsSelected);
   const [shouldReset, setShouldReset] = useState<boolean>(false);
+  const [webUrl, setWebUrl] = useState<string>();
 
   const setPartialOptions = useCallback((newOptions: Partial<Options>, persist: boolean = true) => {
     console.log("setting partial options", newOptions);
@@ -64,6 +70,7 @@ export const App = () => {
     });
     setNextPageToken(result.nextPageToken);
     setEntries(currentEntries => [...currentEntries, ...result.entries]);
+    setWebUrl(result.webUrl);
   }, [options, nextPageToken]);
 
   const resetEntries = useCallback(() => {
@@ -71,6 +78,7 @@ export const App = () => {
     setEntries([]);
     setNextPageToken(undefined);
     setShowEntries(true);
+    setWebUrl(undefined);
     // noinspection JSIgnoredPromiseFromCall
     fetchPageCallback(true);
   }, [setEntries, setNextPageToken, fetchPageCallback]);
@@ -101,6 +109,9 @@ export const App = () => {
               fetchNext={ fetchPageCallback }
               hasMore={ nextPageToken !== null }
           />
+      }
+      {
+        webUrl && <StyledAnchor href={ webUrl } target="_blank">Open in web</StyledAnchor>
       }
     </>
   );

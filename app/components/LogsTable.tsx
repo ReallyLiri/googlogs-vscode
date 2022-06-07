@@ -8,12 +8,12 @@ import { LogSeverity, SeverityToColor } from "../common/filter";
 import * as moment from "moment";
 // @ts-ignore
 import * as objectPath from "object-path";
+import { useWindowHeight } from "@react-hook/window-size";
 import ILogEntry = google.logging.v2.ILogEntry;
 
-const TableHeight = window.innerHeight - 320;
-
-const Wrapper = styled.div<{ isEmpty: boolean }>`
-  height: ${ ({isEmpty}) => isEmpty ? 64 : TableHeight }px;
+const Wrapper = styled.div<{ isEmpty: boolean, windowHeight: number }>`
+  min-height: 64px;
+  height: ${ ({windowHeight}) => windowHeight - 340 }px;
   overflow: auto;
   display: flex;
   flex-direction: column-reverse;
@@ -32,17 +32,16 @@ const LogLine = styled.div<{ severity: LogSeverity }>`
 `;
 
 const MultilineText = styled.div`
-  white-space: pre;
+  width: 150%;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  word-break: break-word;
 `;
 
 const LogContent = ({entry}: { entry: ILogEntry }) => {
   const json = entry.jsonPayload!;
   return <MultilineText>
-    { `${ moment.utc((entry.timestamp as string)).format("YYYY-MM-DD HH:mm:ss") } [${ entry.severity }] ${ objectPath.get(json, "caller") } ${ JSON.stringify(objectPath.get(json, "mdc")) }` }
-    -
-    { objectPath.get(json, "message") }
-    -
-    { objectPath.get(json, "e") }
+    { `${ moment.utc((entry.timestamp as string)).format("YYYY-MM-DD HH:mm:ss") } [${ entry.severity }] ${ objectPath.get(json, "caller") } ${ JSON.stringify(objectPath.get(json, "mdc")) } - ${ objectPath.get(json, "message") } - ${ objectPath.get(json, "e") }` }
   </MultilineText>;
 };
 
@@ -56,11 +55,13 @@ type LogsTableProps = {
 export const LogsTable = ({className, entries, fetchNext, hasMore}: LogsTableProps) => {
   const isEmpty = entries.length === 0;
   const noResults = isEmpty && !hasMore;
+  const windowHeight = useWindowHeight();
   return (
     <Wrapper
       id="scrollableDiv"
       className={ className }
       isEmpty={ isEmpty }
+      windowHeight={ windowHeight }
     >
       {
         noResults
@@ -74,7 +75,7 @@ export const LogsTable = ({className, entries, fetchNext, hasMore}: LogsTablePro
             loader={ <Loader type="Grid" floating={ isEmpty } size={ isEmpty ? 64 : 32 }/> }
             scrollableTarget="scrollableDiv"
           >
-            { entries.map((entry, index) => (
+            { entries.filter(entry => entry.jsonPayload).map((entry, index) => (
               <LogLine key={ index } severity={ entry.severity as LogSeverity }>
                 <LogContent entry={ entry }/>
               </LogLine>

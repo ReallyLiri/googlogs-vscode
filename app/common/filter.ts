@@ -32,6 +32,7 @@ export type Duration = {
 export type LogFilter = {
   projectId?: string,
   containerNames?: string[],
+  namespaces?: string[],
   text?: string,
   severities?: LogSeverity[],
   untilAgo?: Duration,

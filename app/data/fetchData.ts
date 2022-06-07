@@ -1,6 +1,6 @@
 import { FetchOptionsMessage, FetchPageMessage, FetchProjectsMessage, Message, MessageAck, OptionsResultMessage, PageResultMessage, ProjectsResultMessage } from "../common/message";
 import { MessageType } from "../common/messageType";
-import { MOCK_LOGS, MOCK_PROJECTS } from "./mock";
+import { MOCK_LOGS, MOCK_PROJECTS, MOCK_WEB_URL } from "./mock";
 import { getDefaultOptions, Options } from "./options";
 
 const sleep = (seconds: number) => {
@@ -51,7 +51,7 @@ export const fetchProjectsAsync = async (): Promise<ProjectsResultMessage> => {
 export const fetchPageAsync = async (message: FetchPageMessage): Promise<PageResultMessage> => {
   if (isBrowserDebug) {
     await sleep(5);
-    return {type: MessageType.PAGE_RESULT, nextPageToken: "token", entries: MOCK_LOGS};
+    return {type: MessageType.PAGE_RESULT, nextPageToken: "token", entries: MOCK_LOGS, webUrl: MOCK_WEB_URL};
   }
   return await fetchDataAsync<FetchPageMessage, PageResultMessage>(
     message,

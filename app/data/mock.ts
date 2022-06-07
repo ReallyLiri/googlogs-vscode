@@ -8,6 +8,8 @@ export const MOCK_PROJECTS: GoogleProject[] = [
   {id: "prod", name: "production"}
 ];
 
+export const MOCK_WEB_URL = "https://console.cloud.google.com/logs/query;query=resource.type%3D%22k8s_container%22%20AND%20resource.labels.namespace_name%3D%22default%22%20AND%20resource.labels.container_name%3D%22ondemandscan%22%20AND%20%22responseOrInvalidateToken%22%20AND%20NOT%20%22errMsg%3Dtimeout%22%20AND%20NOT%20%22com.dropbox.core.InvalidAccessTokenException%22%20AND%20%28severity%3D%22ERROR%22%29%20AND%20timestamp%3E%3D%222022-06-06T23%3A30%3A20Z%22;?project=akooda-de4bc";
+
 export const MOCK_LOGS: ILogEntry[] = Array(20).fill().map(i => (
     {
       "insertId": "hej2q46u808lwlua",

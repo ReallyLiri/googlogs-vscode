@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { getAuthTokenAsync, resetToken } from "./auth";
 import { constants as httpConstants } from "http2";
 
@@ -27,15 +27,30 @@ async function httpAsyncWithRetry<TIn, TOut>(
   };
   console.log(config);
 
-  const response = await axios.request(config);
-  if (response.status !== httpConstants.HTTP_STATUS_OK) {
+  const retryAsync = async (): Promise<TOut | null> => {
+    resetToken();
+    return await httpAsyncWithRetry(url, method, requestBody, true);
+  };
+
+  let response: AxiosResponse<TOut>;
+  try {
+    response = await axios.request(config);
+  } catch (e) {
     if (!isRetry) {
-      resetToken();
-      return await httpAsyncWithRetry(url, method, requestBody, true);
+      console.log("failed, retrying", e);
+      return await retryAsync();
     }
-    console.error("failed fetching logs", response);
+    console.error("failed", e);
     return null;
-  } else {
-    return response.data as TOut;
   }
+  if (response.status === httpConstants.HTTP_STATUS_OK) {
+    return response.data;
+  }
+
+  if (!isRetry) {
+    console.log("failed, retrying", response);
+    return await retryAsync();
+  }
+  console.error("failed", response);
+  return null;
 }
