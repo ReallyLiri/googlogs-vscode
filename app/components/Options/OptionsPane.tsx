@@ -8,7 +8,7 @@ import { LogSeverity, SeverityToColor } from "../../common/filter";
 import { Box, OPTION_WIDTH, SELECT_STYLES } from "./Styles";
 import { DurationPicker } from "./DurationPicker";
 
-const MARGIN = 32;
+const MARGIN = 16;
 
 const Wrapper = styled.div`
   ${ Box };
@@ -25,7 +25,7 @@ const ApplyButton = styled.div<{ disabled: boolean }>`
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  height: ${ MARGIN }px;
+  height: ${ MARGIN * 2 }px;
   width: 160px;
   cursor: ${ ({disabled}) => disabled ? "default" : "pointer" };
   background-color: ${ ({disabled}) => disabled ? "white" : COLOR_MAIN };
@@ -37,6 +37,7 @@ const Line = styled.div<{ isFirst?: boolean }>`
   justify-content: flex-start;
   align-items: center;
   margin-top: ${ ({isFirst}) => isFirst ? 0 : MARGIN }px;
+  max-width: 940px;
 `;
 
 const Title = styled.span<{ isFirst?: boolean }>`
@@ -44,15 +45,20 @@ const Title = styled.span<{ isFirst?: boolean }>`
   font-weight: bold;
   color: ${ COLOR_MAIN };
   padding-right: ${ MARGIN / 2 }px;
-  padding-left: ${ ({isFirst}) => isFirst ? 0 : MARGIN / 2 }px;
+  padding-left: ${ ({isFirst}) => isFirst ? 0 : MARGIN }px;
 `;
 
 const StyledInput = styled.input`
   ${ Box };
-  height: 32px;
+  height: 20px;
   padding: 8px;
-  width: ${OPTION_WIDTH * 3}px;
+  width: ${ OPTION_WIDTH * 2.5 }px;
   text-align: left;
+`;
+
+const Filler = styled.div`
+  width: 100%;
+  flex: 2;
 `;
 
 const formatProjectSelectOption = (project: GoogleProject) =>
@@ -90,6 +96,7 @@ function OptionsPane({
         options={ projects.map(formatProjectSelectOption) }
         value={ selectedProject ? formatProjectSelectOption(selectedProject) : undefined }
       />
+      <Filler/>
       <Title>Severities:</Title>
       <Select
         isClearable
@@ -121,6 +128,7 @@ function OptionsPane({
         selectedValue={ options.filter.fromAgo }
         onChange={ value => setPartialOptions({filter: {fromAgo: value}}) }
         unsetLabel="the beginning of time"/>
+      <Filler/>
       <Title>Until:</Title>
       <DurationPicker
         selectedValue={ options.filter.untilAgo }
@@ -129,6 +137,7 @@ function OptionsPane({
     </Line>
     <Line>
       <Title isFirst>Query:</Title>
+      <Filler/>
       <StyledInput
         type="text"
         defaultValue={ options.filter.text }
