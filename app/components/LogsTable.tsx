@@ -14,7 +14,7 @@ import ILogEntry = google.logging.v2.ILogEntry;
 const Wrapper = styled.div<{ isEmpty: boolean, windowHeight: number }>`
   min-height: 64px;
   height: fit-content;
-  max-height: ${ ({windowHeight}) => windowHeight - 340 }px;
+  max-height: ${ ({windowHeight}) => windowHeight - 320 }px;
   overflow: auto;
   display: flex;
   flex-direction: column-reverse;
@@ -30,6 +30,9 @@ const LogLine = styled.div<{ severity: LogSeverity }>`
   color: ${ ({severity}) => SeverityToColor[severity] };
   padding: 4px;
   margin: 4px 0 0 4px;
+  :hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
 `;
 
 const MultilineText = styled.div`

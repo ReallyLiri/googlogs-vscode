@@ -2,11 +2,12 @@ import React from "react";
 import Select from "react-select";
 import { GoogleProject } from "../../common/googleProject";
 import { COLOR_DARK, COLOR_LIGHT, COLOR_MAIN } from "../../style";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { Options } from "../../data/options";
 import { LogSeverity, SeverityToColor } from "../../common/filter";
 import { Box, OPTION_WIDTH, SELECT_STYLES } from "./Styles";
 import { DurationPicker } from "./DurationPicker";
+import TagsInput from 'react-tagsinput';
 
 const MARGIN = 16;
 
@@ -48,12 +49,56 @@ const Title = styled.span<{ isFirst?: boolean }>`
   padding-left: ${ ({isFirst}) => isFirst ? 0 : MARGIN }px;
 `;
 
-const StyledInput = styled.input`
+const InputStyle = css`
   ${ Box };
   height: 20px;
+  text-align: left;
+`
+
+const StyledInput = styled.input`
+  ${ InputStyle };
   padding: 8px;
   width: ${ OPTION_WIDTH * 2.5 }px;
-  text-align: left;
+`;
+
+const StyledTagsInput = styled(TagsInput)`
+  ${ InputStyle };
+  width: ${ OPTION_WIDTH }px;
+  background-color: white;
+  padding: 1px;
+  height: fit-content;
+  display: flex;
+  white-space: nowrap;
+  overflow: auto;
+
+  .react-tagsinput-input {
+    padding: 8px;
+    border: unset;
+  }
+
+  .react-tagsinput-tag {
+    ${ Box };
+    padding: 4px;
+    margin: 2px;
+    color: ${ COLOR_MAIN };
+    cursor: default;
+
+    .react-tagsinput-remove {
+      ::before {
+        content: "x";
+        padding-left: 4px
+      }
+
+      cursor: pointer;
+      display: inline-flex;
+      height: 16px;
+      width: 17px;
+      background-color: ${ COLOR_MAIN };
+      color: white;
+      margin-left: 4px;
+      border-radius: 4px;
+    }
+  }
 `;
 
 const Filler = styled.div`
@@ -85,6 +130,7 @@ function OptionsPane({
   const selectedProject = projects.find(project => project.id === options.filter.projectId);
 
 
+  // @ts-ignore
   return <Wrapper className={ className }>
     <Line isFirst>
       <Title isFirst>Project:</Title>
@@ -134,6 +180,24 @@ function OptionsPane({
         selectedValue={ options.filter.untilAgo }
         onChange={ value => setPartialOptions({filter: {untilAgo: value}}) }
         unsetLabel="now"/>
+    </Line>
+    <Line>
+      <Title isFirst>Namespaces:</Title>
+      <StyledTagsInput
+        value={ options.filter.namespaces ?? [] }
+        onChange={ (namespaces) => setPartialOptions({filter: {namespaces: namespaces ?? []}}) }
+        onlyUnique
+        inputProps={ {placeholder: "Enter a namespace"} }
+      />
+      <Filler/>
+      <Title>Deployments:</Title>
+      <StyledTagsInput
+        value={ options.filter.containerNames ?? [] }
+        onChange={ (containerNames) => setPartialOptions({filter: {containerNames: containerNames ?? []}}) }
+        onlyUnique
+        inputProps={ {placeholder: "Enter a name"} }
+      />
+      <Filler/>
     </Line>
     <Line>
       <Title isFirst>Query:</Title>
