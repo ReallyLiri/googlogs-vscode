@@ -9,8 +9,8 @@ import Loader from "./Loader";
 import OptionsPane from "./Options/OptionsPane";
 import styled from "styled-components";
 import { OptionsResultMessage, ProjectsResultMessage } from "../common/message";
+import { Footer } from "./Footer";
 import ILogEntry = google.logging.v2.ILogEntry;
-import { COLOR_LIGHT } from "../style";
 
 const MARGIN = 8;
 
@@ -22,9 +22,8 @@ const StyledLogsTable = styled(LogsTable)`
   margin: ${ MARGIN }px;
 `;
 
-const StyledAnchor = styled.a`
+const StyledFooter = styled(Footer)`
   margin: ${ MARGIN }px;
-  color: ${ COLOR_LIGHT };
 `;
 
 export const App = () => {
@@ -112,7 +111,11 @@ export const App = () => {
           />
       }
       {
-        webUrl && <StyledAnchor href={ webUrl } target="_blank">Open in web</StyledAnchor>
+        webUrl && <StyledFooter
+              webUrl={ webUrl }
+              entriesCount={ entries.length }
+              hasMore={ nextPageToken !== null }
+          />
       }
     </>
   );
