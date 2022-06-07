@@ -11,7 +11,8 @@
   ],
   "activationEvents": [
     "onStartupFinished",
-    "googelogs.explorer"
+    "googelogs.explorer",
+    "onView:googelogs"
   ],
   "main": "./out/src/extension.js",
   "contributes": {
@@ -22,12 +23,21 @@
         "category": "Googelogs"
       }
     ],
-    "views": {
-      "explorer": [
+    "viewsContainers": {
+      "activitybar": [
         {
-          "type": "webview",
-          "id": "googelogs.view",
-          "name": "Googelogs"
+          "id": "googelogs",
+          "title": "Googelogs",
+          "icon": "icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "googelogs": [
+        {
+          "id": "view",
+          "name": "View",
+          "contextualTitle": "View Logs"
         }
       ]
     },
