@@ -36,7 +36,7 @@ export const MOCK_LOGS: ILogEntry[] = Array(20).fill().map(i => (
         }
       },
       "timestamp": "2022-06-06T08:21:26.343874838Z",
-      "severity": "ERROR",
+      "severity": "DEBUG",
       "labels": {
         "k8s-pod/app_kubernetes_io/instance": "reactor",
         "k8s-pod/app_kubernetes_io/name": "reactor",

@@ -31,7 +31,7 @@ const LogLine = styled.div<{ severity: LogSeverity }>`
   padding: 4px;
   margin: 4px 0 0 4px;
   :hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
   }
 `;
 
