@@ -58,6 +58,7 @@ export class ViewLoader {
     const options = {
       enableScripts: true,
       retainContextWhenHidden: true,
+      enableFindWidget: true,
       localResourceRoots: [vscode.Uri.file(path.join(this.context.extensionPath, 'out', 'app'))],
     };
 
