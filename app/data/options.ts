@@ -9,10 +9,12 @@ export const getDefaultOptions = (projectId: string): Options => ({
     untilAgo: {value: 0, unit: DurationUnits.none},
     namespaces: ["default"],
   },
-  pageSize: DEFAULT_PAGE_SIZE
+  pageSize: DEFAULT_PAGE_SIZE,
+  schema: ".timestamp [.severity] .jsonPayload.caller .jsonPayload.mdc - .jsonPayload.message - .jsonPayload.e",
 });
 
 export type Options = {
   filter: LogFilter,
-  pageSize: number
+  pageSize: number,
+  schema: string,
 };

@@ -55,10 +55,11 @@ const InputStyle = css`
   text-align: left;
 `
 
-const StyledInput = styled.input`
+const StyledInput = styled.input<{ color?: string }>`
   ${ InputStyle };
   padding: 8px;
   width: ${ OPTION_WIDTH * 2.5 }px;
+  color: ${ ({color}) => color ?? COLOR_DARK };
 `;
 
 const StyledTagsInput = styled(TagsInput)`
@@ -206,6 +207,16 @@ function OptionsPane({
         type="text"
         defaultValue={ options.filter.text }
         onChange={ e => setPartialOptions({filter: {text: e.target.value}}) }
+      />
+    </Line>
+    <Line>
+      <Title isFirst>Schema:</Title>
+      <Filler/>
+      <StyledInput
+        type="text"
+        defaultValue={ options.schema }
+        onChange={ e => setPartialOptions({schema: e.target.value}) }
+        color={COLOR_MAIN}
       />
     </Line>
     <Line>

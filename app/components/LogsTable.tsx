@@ -1,20 +1,20 @@
 import InfiniteScroll from "react-infinite-scroll-component";
-import React from "react";
+import React, { useMemo } from "react";
 import { google } from "@google-cloud/logging/build/protos/protos";
 import styled from "styled-components";
 import Loader from "./Loader";
 import { COLOR_MAIN } from "../style";
 import { LogSeverity, SeverityToColor } from "../common/filter";
-import * as moment from "moment";
 // @ts-ignore
 import * as objectPath from "object-path";
 import { useWindowHeight } from "@react-hook/window-size";
+import { buildFormatter, EntryFormatter } from "../data/schema";
 import ILogEntry = google.logging.v2.ILogEntry;
 
 const Wrapper = styled.div<{ isEmpty: boolean, windowHeight: number }>`
   min-height: 64px;
   height: fit-content;
-  max-height: ${ ({windowHeight}) => windowHeight - 320 }px;
+  max-height: ${ ({windowHeight}) => windowHeight - 370 }px;
   overflow: auto;
   display: flex;
   flex-direction: column-reverse;
@@ -30,6 +30,7 @@ const LogLine = styled.div<{ severity: LogSeverity }>`
   color: ${ ({severity}) => SeverityToColor[severity] };
   padding: 4px;
   margin: 4px 0 0 4px;
+
   :hover {
     background-color: rgba(255, 255, 255, 0.05);
   }
@@ -42,10 +43,9 @@ const MultilineText = styled.div`
   word-break: break-word;
 `;
 
-const LogContent = ({entry}: { entry: ILogEntry }) => {
-  const json = entry.jsonPayload!;
+const LogContent = ({entry, formatter}: { entry: ILogEntry, formatter: EntryFormatter }) => {
   return <MultilineText>
-    { `${ moment.utc((entry.timestamp as string)).format("YYYY-MM-DD HH:mm:ss") } [${ entry.severity }] ${ objectPath.get(json, "caller") } ${ JSON.stringify(objectPath.get(json, "mdc")) } - ${ objectPath.get(json, "message") } - ${ objectPath.get(json, "e") }` }
+    { formatter(entry) }
   </MultilineText>;
 };
 
@@ -53,13 +53,17 @@ type LogsTableProps = {
   className?: string,
   entries: ILogEntry[],
   fetchNext: () => Promise<void>,
-  hasMore: boolean
+  hasMore: boolean,
+  schema: string
 };
 
-export const LogsTable = ({className, entries, fetchNext, hasMore}: LogsTableProps) => {
+export const LogsTable = ({className, entries, fetchNext, hasMore, schema}: LogsTableProps) => {
   const isEmpty = entries.length === 0;
   const noResults = isEmpty && !hasMore;
   const windowHeight = useWindowHeight();
+
+  const formatter = useMemo(() => buildFormatter(schema), [schema]);
+
   return (
     <Wrapper
       id="scrollableDiv"
@@ -81,7 +85,7 @@ export const LogsTable = ({className, entries, fetchNext, hasMore}: LogsTablePro
           >
             { entries.filter(entry => entry.jsonPayload).map((entry, index) => (
               <LogLine key={ index } severity={ entry.severity as LogSeverity }>
-                <LogContent entry={ entry }/>
+                <LogContent entry={ entry } formatter={ formatter }/>
               </LogLine>
             )) }
           </InfiniteScroll>

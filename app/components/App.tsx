@@ -108,6 +108,7 @@ export const App = () => {
               entries={ entries }
               fetchNext={ fetchPageCallback }
               hasMore={ nextPageToken !== null }
+              schema={ options.schema }
           />
       }
       {

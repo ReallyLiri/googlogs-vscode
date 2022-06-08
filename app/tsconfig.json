@@ -9,7 +9,7 @@
     "experimentalDecorators": true,
     "lib": [
       "dom",
-      "es2021"
+      "ES5"
     ],
     "strict": true
   }
