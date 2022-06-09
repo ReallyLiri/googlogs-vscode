@@ -10,6 +10,8 @@ import OptionsPane from "./Options/OptionsPane";
 import styled from "styled-components";
 import { OptionsResultMessage, ProjectsResultMessage } from "../common/message";
 import { Footer } from "./Footer";
+import Error from "./Error";
+import { ErrorBoundary } from "react-error-boundary";
 import ILogEntry = google.logging.v2.ILogEntry;
 
 const MARGIN = 8;
@@ -27,6 +29,7 @@ const StyledFooter = styled(Footer)`
 `;
 
 export const App = () => {
+  const [error, setError] = useState<string>();
   const [options, setOptions] = useState<Options>(getDefaultOptions(""));
   const [entries, setEntries] = useState<ILogEntry[]>([]);
   const [nextPageToken, setNextPageToken] = useState<string | null>();
@@ -61,7 +64,10 @@ export const App = () => {
         setShouldReset(true);
       }
     })
-      .catch(error => console.error(error));
+      .catch(error => {
+        console.error(error);
+        setError("failed to load");
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -82,8 +88,8 @@ export const App = () => {
     setNextPageToken(undefined);
     setShowEntries(true);
     setWebUrl(undefined);
-    // noinspection JSIgnoredPromiseFromCall
-    fetchPageCallback(true);
+    fetchPageCallback(true)
+      .catch(() => setError("failed to fetch logs"));
   }, [setEntries, setNextPageToken, fetchPageCallback]);
 
   useEffect(() => {
@@ -94,8 +100,8 @@ export const App = () => {
   }, [shouldReset, resetEntries]);
 
   const saveAs = useCallback(() => {
-    // noinspection JSIgnoredPromiseFromCall
-    saveAsAsync(options);
+    saveAsAsync(options)
+      .catch(() => setError("failed to save state"));
   }, [options]);
 
   const load = useCallback(() => {
@@ -111,8 +117,11 @@ export const App = () => {
     setOptionsPaneHeight(optionsPaneRef.current?.clientHeight || 0);
   }, [optionsPaneRef.current, optionsCollapsed]);
 
+  if (error) {
+    return <Error error={ error }/>;
+  }
   return (
-    <>
+    <ErrorBoundary FallbackComponent={ props => <Error error={ props.error.message }/> }>
       {
         !projects && <Loader type="Audio" title="Loading..." floating size={ 100 }/>
       }
@@ -145,6 +154,6 @@ export const App = () => {
               hasMore={ nextPageToken !== null }
           />
       }
-    </>
+    </ErrorBoundary>
   );
 };
