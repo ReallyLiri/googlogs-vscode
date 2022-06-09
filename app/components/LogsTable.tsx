@@ -87,7 +87,7 @@ export const LogsTable = ({className, entries, fetchNext, hasMore, schema, optio
             loader={ <Loader type="Grid" floating={ isEmpty } size={ isEmpty ? 64 : 32 }/> }
             scrollableTarget="scrollableDiv"
           >
-            { entries.filter(entry => entry.jsonPayload).map((entry, index) => (
+            { entries.map((entry, index) => (
               <LogLine key={ index } severity={ entry.severity as LogSeverity }>
                 <LogContent entry={ entry } formatter={ formatter }/>
               </LogLine>
