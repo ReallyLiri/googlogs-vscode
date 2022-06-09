@@ -52,7 +52,7 @@ export const App = () => {
     }
   }, [options, setOptions]);
 
-  useEffect(() => {
+  const init = useCallback(() => {
     const loaders = [fetchOptionsAsync(), fetchProjectsAsync()];
     Promise.all(loaders).then(results => {
       const loadedOptions = (results[0] as OptionsResultMessage).options || getDefaultOptions("");
@@ -80,6 +80,10 @@ export const App = () => {
         console.error(error);
         setError("failed to load");
       });
+  }, [setPartialOptions]);
+
+  useEffect(() => {
+    init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -129,11 +133,22 @@ export const App = () => {
     setOptionsPaneHeight(optionsPaneRef.current?.clientHeight || 0);
   }, [optionsPaneRef.current, optionsCollapsed]);
 
+  const retry = useCallback(() => {
+      setError(undefined);
+      init();
+    }, [init]
+  );
+
   if (error) {
-    return <Error error={ error }/>;
+    return <Error error={ error } retry={ retry }/>;
   }
   return (
-    <ErrorBoundary FallbackComponent={ props => <Error error={ props.error.message }/> }>
+    <ErrorBoundary
+      FallbackComponent={ props => {
+        console.error(props.error);
+        return <Error retry={ retry }/>;
+      } }
+    >
       {
         !projects && <Loader type="Audio" title="Loading..." floating size={ 100 }/>
       }
