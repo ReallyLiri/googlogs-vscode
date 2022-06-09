@@ -2,7 +2,7 @@
 
 VSCode extension to view Google Cloud Logs.
 
-![icon](res/icon.png | width=250)
+<img src="res/icon.png" alt="icon" width="250">
 
 ![demo](res/demo.gif)
 
