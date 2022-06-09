@@ -4,7 +4,7 @@ import { GetEntriesRequest } from "@google-cloud/logging/build/src/log";
 import { httpAsync } from "./client";
 import ListProjectsResponse = google.cloud.resourcemanager.v3.ListProjectsResponse;
 
-export async function getProjectsAsync(): Promise<GoogleProject[]> {
+export async function getProjectsAsync(): Promise<{ projects: GoogleProject[], commandMissing?: boolean }> {
   try {
     const projectsResponse = await httpAsync<GetEntriesRequest, ListProjectsResponse>(
       'https://cloudresourcemanager.googleapis.com/v1/projects?alt=json&filter=lifecycleState%3AACTIVE',
@@ -12,13 +12,18 @@ export async function getProjectsAsync(): Promise<GoogleProject[]> {
     );
 
     if (projectsResponse) {
-      return projectsResponse.projects.map(project => ({
-        id: project.projectId!,
-        name: project.name!
-      }));
+      return {
+        projects: projectsResponse.projects.map(project => ({
+          id: project.projectId!,
+          name: project.name!
+        }))
+      };
     }
   } catch (e) {
-    console.error("failed fetching logs", e);
+    if ((e as Error).message.includes("command not found")) {
+      return {projects: [], commandMissing: true};
+    }
+    console.error("failed fetching projects", e);
   }
-  return [];
+  return {projects: []};
 }

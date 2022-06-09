@@ -56,7 +56,15 @@ export const App = () => {
     const loaders = [fetchOptionsAsync(), fetchProjectsAsync()];
     Promise.all(loaders).then(results => {
       const loadedOptions = (results[0] as OptionsResultMessage).options || getDefaultOptions("");
-      const googleProjects = (results[1] as ProjectsResultMessage).projects;
+      const {projects: googleProjects, commandMissing} = (results[1] as ProjectsResultMessage);
+      if (commandMissing) {
+        setError("gcloud command is not installed or not accessible");
+        return;
+      }
+      if (projects?.length === 0) {
+        setError("no cloud projects found");
+        return;
+      }
       setProjects(googleProjects);
       setPartialOptions(loadedOptions, false);
       console.log("initial read done", loadedOptions, googleProjects);

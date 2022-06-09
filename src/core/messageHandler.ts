@@ -20,10 +20,14 @@ export async function handleMessage(panel: vscode.WebviewPanel, message: Message
       await fetchAndPostDataAsync(panel, () => readLogsPageAsync(message as FetchPageMessage));
       break;
     case MessageType.FETCH_PROJECTS:
-      await fetchAndPostDataAsync<ProjectsResultMessage>(panel, async () => ({
-        type: MessageType.PROJECTS_RESULT,
-        projects: await getProjectsAsync()
-      }));
+      await fetchAndPostDataAsync<ProjectsResultMessage>(panel, async () => {
+        const {projects, commandMissing} = await getProjectsAsync();
+        return ({
+          type: MessageType.PROJECTS_RESULT,
+          projects,
+          commandMissing
+        });
+      });
       break;
     case MessageType.FETCH_OPTIONS:
       await fetchAndPostDataAsync(panel, async () => ({

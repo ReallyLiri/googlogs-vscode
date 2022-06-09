@@ -1,11 +1,16 @@
 import React from "react";
 import styled from "styled-components";
-import { COLOR_MAIN } from "../style";
+import { COLOR_ERROR } from "../style";
+import { useWindowHeight } from "@react-hook/window-size";
 
-const Wrapper = styled.div`
-  position: absolute;
-  left: 50%;
-  top: calc(50% - 88px);
+const Wrapper = styled.div<{ height: number }>`
+  height: ${ ({height}) => height }px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-self: center;
+  flex-direction: column;
 `;
 
 const Emoji = styled.div`
@@ -18,7 +23,7 @@ const Message = styled.div`
   margin-top: 20px;
   text-align: center;
   font-size: 16px;
-  color: ${ COLOR_MAIN };
+  color: ${ COLOR_ERROR };
 `;
 
 type ErrorProps = {
@@ -26,7 +31,8 @@ type ErrorProps = {
 };
 
 export default ({error}: ErrorProps) => {
-  return <Wrapper>
+  const windowHeight = useWindowHeight();
+  return <Wrapper height={ windowHeight }>
     <Emoji>💔</Emoji>
     <Message>{ error ?? "Something went wrong..." }</Message>
   </Wrapper>;
