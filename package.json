@@ -24,7 +24,7 @@
     "gcloud",
     "stackdriver"
   ],
-  "icon": "icon.png",
+  "icon": "res/icon.png",
   "activationEvents": [
     "onStartupFinished"
   ],
@@ -42,7 +42,7 @@
         {
           "id": "googlogs",
           "title": "Googlogs",
-          "icon": "icon.svg"
+          "icon": "res/icon.svg"
         }
       ]
     },

@@ -12,3 +12,4 @@ node_modules
 googlogs-v*.tgz
 *.vsix
 package*.json
+res/demo.gif
