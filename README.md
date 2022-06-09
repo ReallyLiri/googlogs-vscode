@@ -1,3 +1,3 @@
-# Googelogs
+# Googlogs
 
 ![icon](icon.png)

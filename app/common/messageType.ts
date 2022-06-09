@@ -5,5 +5,7 @@ export enum MessageType {
   PAGE_RESULT = 'PAGE_RESULT',
   FETCH_PROJECTS = 'FETCH_PROJECTS',
   PROJECTS_RESULT = 'PROJECTS_RESULT',
+  SAVE_AS = 'SAVE_AS',
+  LOAD = 'LOAD',
   ACK = 'ACK'
 }

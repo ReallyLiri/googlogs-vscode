@@ -11,29 +11,29 @@
   ],
   "activationEvents": [
     "onStartupFinished",
-    "googelogs.explorer",
-    "onView:googelogs"
+    "googlogs.explorer",
+    "onView:googlogs"
   ],
   "main": "./out/src/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "googelogs.openLogsViewer",
+        "command": "googlogs.openLogsViewer",
         "title": "View Google Logs",
-        "category": "Googelogs"
+        "category": "Googlogs"
       }
     ],
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "googelogs",
-          "title": "Googelogs",
+          "id": "googlogs",
+          "title": "Googlogs",
           "icon": "icon.svg"
         }
       ]
     },
     "views": {
-      "googelogs": [
+      "googlogs": [
         {
           "id": "view",
           "name": "View",
@@ -43,7 +43,7 @@
     },
     "keybindings": [
       {
-        "command": "googelogs.openLogsViewer",
+        "command": "googlogs.openLogsViewer",
         "key": "ctrl+l",
         "mac": "cmd+l"
       }

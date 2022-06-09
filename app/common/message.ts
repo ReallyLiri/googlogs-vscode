@@ -19,7 +19,7 @@ export interface FetchOptionsMessage extends Message {
 
 export interface OptionsResultMessage extends Message {
   type: MessageType.OPTIONS_RESULT,
-  options: Options
+  options: Options | null
 }
 
 export interface FetchPageMessage extends Message {
@@ -43,4 +43,13 @@ export interface FetchProjectsMessage extends Message {
 export interface ProjectsResultMessage extends Message {
   type: MessageType.PROJECTS_RESULT,
   projects: GoogleProject[]
+}
+
+export interface SaveAsMessage extends Message {
+  type: MessageType.SAVE_AS,
+  options: Options
+}
+
+export interface LoadMessage extends Message {
+  type: MessageType.LOAD,
 }

@@ -1,4 +1,4 @@
-import { FetchOptionsMessage, FetchPageMessage, FetchProjectsMessage, Message, MessageAck, OptionsResultMessage, PageResultMessage, ProjectsResultMessage } from "../common/message";
+import { FetchOptionsMessage, FetchPageMessage, FetchProjectsMessage, LoadMessage, Message, MessageAck, OptionsResultMessage, PageResultMessage, ProjectsResultMessage, SaveAsMessage } from "../common/message";
 import { MessageType } from "../common/messageType";
 import { MOCK_LOGS, MOCK_PROJECTS, MOCK_WEB_URL } from "./mock";
 import { getDefaultOptions, Options } from "./options";
@@ -76,5 +76,25 @@ export const postOptionsAsync = async (options: Options): Promise<void> => {
   await fetchDataAsync<OptionsResultMessage, MessageAck>(
     {type: MessageType.OPTIONS_RESULT, options},
     MessageType.ACK
+  );
+};
+
+export const saveAsAsync = async (options: Options): Promise<void> => {
+  if (isBrowserDebug) {
+    return;
+  }
+  await fetchDataAsync<SaveAsMessage, MessageAck>(
+    {type: MessageType.SAVE_AS, options},
+    MessageType.ACK
+  );
+};
+
+export const loadAsync = async (): Promise<OptionsResultMessage> => {
+  if (isBrowserDebug) {
+    return {type: MessageType.OPTIONS_RESULT, options: null};
+  }
+  return await fetchDataAsync<LoadMessage, OptionsResultMessage>(
+    {type: MessageType.LOAD},
+    MessageType.OPTIONS_RESULT
   );
 };

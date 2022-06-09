@@ -5,10 +5,10 @@ import { COLOR_DARK, COLOR_LIGHT, COLOR_MAIN } from "../../style";
 import styled, { css } from "styled-components";
 import { DEFAULT_PAGE_SIZE, Options } from "../../data/options";
 import { LogSeverity, SeverityToColor } from "../../common/filter";
-import { Box, OPTION_WIDTH, SELECT_STYLES } from "./Styles";
+import { Box, InputStyle, OPTION_WIDTH, SELECT_STYLES } from "./Styles";
 import { DurationPicker } from "./DurationPicker";
-import TagsInput from 'react-tagsinput';
 import NumberPicker from "./NumberPicker";
+import { StyledTagsInput } from "./TagsInput";
 
 const MARGIN = 16;
 
@@ -20,17 +20,30 @@ const Wrapper = styled.div`
   width: fit-content;
 `;
 
-const ApplyButton = styled.div<{ disabled: boolean }>`
+const ButtonStyle = css`
   ${ Box };
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  height: ${ MARGIN * 2 }px;
+  height: 34px;
+  cursor: pointer;
+`;
+
+const ApplyButton = styled.div<{ disabled: boolean }>`
+  ${ ButtonStyle };
   width: 160px;
   cursor: ${ ({disabled}) => disabled ? "default" : "pointer" };
   background-color: ${ ({disabled}) => disabled ? "white" : COLOR_MAIN };
   color: ${ ({disabled}) => disabled ? COLOR_DARK : "White" };
+`;
+
+const ActionButton = styled.div`
+  ${ ButtonStyle };
+  width: 100px;
+  background-color: ${ COLOR_DARK };
+  color: white;
+  margin-left: 4px;
 `;
 
 const Line = styled.div<{ isFirst?: boolean }>`
@@ -49,57 +62,11 @@ const Title = styled.span<{ isFirst?: boolean }>`
   padding-left: ${ ({isFirst}) => isFirst ? 0 : MARGIN }px;
 `;
 
-const InputStyle = css`
-  ${ Box };
-  height: 20px;
-  text-align: left;
-`
-
 const StyledInput = styled.input<{ color?: string }>`
   ${ InputStyle };
   padding: 8px;
   width: ${ OPTION_WIDTH * 2.5 }px;
   color: ${ ({color}) => color ?? COLOR_DARK };
-`;
-
-const StyledTagsInput = styled(TagsInput)`
-  ${ InputStyle };
-  width: ${ OPTION_WIDTH }px;
-  background-color: white;
-  padding: 1px;
-  height: fit-content;
-  display: flex;
-  white-space: nowrap;
-  overflow: auto;
-
-  .react-tagsinput-input {
-    padding: 8px;
-    border: unset;
-  }
-
-  .react-tagsinput-tag {
-    ${ Box };
-    padding: 4px;
-    margin: 2px;
-    color: ${ COLOR_MAIN };
-    cursor: default;
-
-    .react-tagsinput-remove {
-      ::before {
-        content: "x";
-        padding-left: 4px
-      }
-
-      cursor: pointer;
-      display: inline-flex;
-      height: 16px;
-      width: 17px;
-      background-color: ${ COLOR_MAIN };
-      color: white;
-      margin-left: 4px;
-      border-radius: 4px;
-    }
-  }
 `;
 
 const Filler = styled.div`
@@ -118,6 +85,8 @@ type OptionsPaneProps = {
   projects: GoogleProject[],
   setPartialOptions: (partialOptions: Partial<Options>) => void;
   apply: () => void;
+  triggerLoad: () => void;
+  triggerSaveAs: () => void;
 };
 
 function OptionsPane({
@@ -125,7 +94,9 @@ function OptionsPane({
                        options,
                        projects,
                        setPartialOptions,
-                       apply
+                       apply,
+                       triggerLoad,
+                       triggerSaveAs
                      }: OptionsPaneProps) {
   const canApply = options.filter.projectId && options.filter.projectId.length > 0;
   const selectedProject = projects.find(project => project.id === options.filter.projectId);
@@ -205,6 +176,7 @@ function OptionsPane({
       <Filler/>
       <StyledInput
         type="text"
+        placeholder='For example: resource.labels.cluster_name="prod" AND NOT timeout'
         defaultValue={ options.filter.text }
         onChange={ e => setPartialOptions({filter: {text: e.target.value}}) }
       />
@@ -214,9 +186,10 @@ function OptionsPane({
       <Filler/>
       <StyledInput
         type="text"
+        placeholder="Use dot notation to access log properties"
         defaultValue={ options.schema }
         onChange={ e => setPartialOptions({schema: e.target.value}) }
-        color={COLOR_MAIN}
+        color={ COLOR_MAIN }
       />
     </Line>
     <Line>
@@ -229,6 +202,8 @@ function OptionsPane({
         value={ options.pageSize }
         setValue={ value => setPartialOptions({pageSize: value ?? DEFAULT_PAGE_SIZE}) }
       />
+      <ActionButton title="Load" onClick={ () => triggerLoad() }>Load</ActionButton>
+      <ActionButton title="Save as" onClick={ () => triggerSaveAs() }>Save as</ActionButton>
     </Line>
   </Wrapper>;
 }

@@ -15,3 +15,9 @@ export const Box = css`
   border-radius: 4px;
   border: 1px solid hsl(0, 0%, 80%);
 `;
+
+export const InputStyle = css`
+  ${ Box };
+  height: 20px;
+  text-align: left;
+`;

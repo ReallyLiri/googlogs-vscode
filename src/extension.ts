@@ -24,7 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
   context.subscriptions.push(
-    vscode.commands.registerCommand('googelogs.openLogsViewer', () => {
+    vscode.commands.registerCommand('googlogs.openLogsViewer', () => {
       ViewLoader.showWebview(context);
     }),
     activityBarTreeView

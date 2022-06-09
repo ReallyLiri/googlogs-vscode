@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { GoogleProject } from "../common/googleProject";
 import { getDefaultOptions, Options } from "../data/options";
-import { fetchOptionsAsync, fetchPageAsync, fetchProjectsAsync, postOptionsAsync } from "../data/fetchData";
+import { fetchOptionsAsync, fetchPageAsync, fetchProjectsAsync, loadAsync, postOptionsAsync, saveAsAsync } from "../data/fetchData";
 import { MessageType } from "../common/messageType";
 import { google } from "@google-cloud/logging/build/protos/protos";
 import { LogsTable } from "./LogsTable";
@@ -49,7 +49,7 @@ export const App = () => {
   useEffect(() => {
     const loaders = [fetchOptionsAsync(), fetchProjectsAsync()];
     Promise.all(loaders).then(results => {
-      const loadedOptions = (results[0] as OptionsResultMessage).options;
+      const loadedOptions = (results[0] as OptionsResultMessage).options || getDefaultOptions("");
       const googleProjects = (results[1] as ProjectsResultMessage).projects;
       setProjects(googleProjects);
       setPartialOptions(loadedOptions, false);
@@ -90,6 +90,20 @@ export const App = () => {
     }
   }, [shouldReset, resetEntries]);
 
+  const saveAs = useCallback(() => {
+    // noinspection JSIgnoredPromiseFromCall
+    saveAsAsync(options);
+  }, [options]);
+
+  const load = useCallback(() => {
+    loadAsync().then(optionsResult => {
+      if (optionsResult.options) {
+        setOptions(optionsResult.options);
+        setShouldReset(true);
+      }
+    });
+  }, [setOptions, setShouldReset]);
+
   return (
     <>
       {
@@ -101,6 +115,8 @@ export const App = () => {
               projects={ projects }
               setPartialOptions={ partialOptions => setPartialOptions(partialOptions) }
               apply={ () => resetEntries() }
+              triggerLoad={ load }
+              triggerSaveAs={ saveAs }
           />
       }
       {
