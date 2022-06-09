@@ -2,8 +2,6 @@ import * as vscode from 'vscode';
 import { TreeItem } from 'vscode';
 import { ViewLoader } from './ViewLoader';
 
-console.log("registered");
-
 class Provider implements vscode.TreeDataProvider<void> {
   onDidChangeTreeData?: vscode.Event<void | void[] | null | undefined> | undefined;
 
@@ -17,7 +15,6 @@ class Provider implements vscode.TreeDataProvider<void> {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-  console.error("activated");
   try {
     const activityBarTreeView = vscode.window.createTreeView('view', {treeDataProvider: new Provider()});
     activityBarTreeView.title = "";

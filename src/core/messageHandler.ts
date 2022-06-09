@@ -21,11 +21,12 @@ export async function handleMessage(panel: vscode.WebviewPanel, message: Message
       break;
     case MessageType.FETCH_PROJECTS:
       await fetchAndPostDataAsync<ProjectsResultMessage>(panel, async () => {
-        const {projects, commandMissing} = await getProjectsAsync();
+        const {projects, commandMissing, authFailed} = await getProjectsAsync();
         return ({
           type: MessageType.PROJECTS_RESULT,
           projects,
-          commandMissing
+          commandMissing,
+          authFailed
         });
       });
       break;

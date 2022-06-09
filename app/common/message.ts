@@ -43,7 +43,8 @@ export interface FetchProjectsMessage extends Message {
 export interface ProjectsResultMessage extends Message {
   type: MessageType.PROJECTS_RESULT,
   projects: GoogleProject[],
-  commandMissing?: boolean
+  commandMissing?: boolean,
+  authFailed?: boolean,
 }
 
 export interface SaveAsMessage extends Message {

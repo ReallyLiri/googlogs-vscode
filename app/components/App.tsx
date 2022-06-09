@@ -56,12 +56,16 @@ export const App = () => {
     const loaders = [fetchOptionsAsync(), fetchProjectsAsync()];
     Promise.all(loaders).then(results => {
       const loadedOptions = (results[0] as OptionsResultMessage).options || getDefaultOptions("");
-      const {projects: googleProjects, commandMissing} = (results[1] as ProjectsResultMessage);
+      const {projects: googleProjects, commandMissing, authFailed} = (results[1] as ProjectsResultMessage);
       if (commandMissing) {
         setError("gcloud command is not installed or not accessible");
         return;
       }
-      if (projects?.length === 0) {
+      if (authFailed) {
+        setError("authentication failed");
+        return;
+      }
+      if (googleProjects.length === 0) {
         setError("no cloud projects found");
         return;
       }
