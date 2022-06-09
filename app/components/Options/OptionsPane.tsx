@@ -1,4 +1,4 @@
-import React from "react";
+import React, { MutableRefObject } from "react";
 import Select from "react-select";
 import { GoogleProject } from "../../common/googleProject";
 import { COLOR_DARK, COLOR_LIGHT, COLOR_MAIN } from "../../style";
@@ -74,12 +74,27 @@ const Filler = styled.div`
   flex: 2;
 `;
 
+const CollapseButton = styled.div<{ collapsed: boolean }>`
+  ${ ButtonStyle };
+  border-radius: 50%;
+  background-color: ${ COLOR_MAIN };
+  color: white;
+  cursor: pointer;
+  height: 24px;
+  width: 24px;
+  margin-left: ${ MARGIN / 2 }px;
+  padding-top: 4px;
+  transform: ${ ({collapsed}) => collapsed ? "scaleY(-1)" : "unset" };
+  box-sizing: border-box;
+`;
+
 const formatProjectSelectOption = (project: GoogleProject) =>
   ({value: project.id, label: project.name});
 const formatSelectOption = <T extends string>(selectOption: T, display?: string) =>
   ({value: selectOption, label: display ? display : selectOption as string});
 
 type OptionsPaneProps = {
+  forwardedRef?: MutableRefObject<any>,
   className?: string,
   options: Options
   projects: GoogleProject[],
@@ -87,123 +102,137 @@ type OptionsPaneProps = {
   apply: () => void;
   triggerLoad: () => void;
   triggerSaveAs: () => void;
+  collapsed: boolean;
+  toggleCollapsed: () => void;
 };
 
 function OptionsPane({
+                       forwardedRef,
                        className,
                        options,
                        projects,
                        setPartialOptions,
                        apply,
                        triggerLoad,
-                       triggerSaveAs
+                       triggerSaveAs,
+                       collapsed,
+                       toggleCollapsed
                      }: OptionsPaneProps) {
   const canApply = options.filter.projectId && options.filter.projectId.length > 0;
   const selectedProject = projects.find(project => project.id === options.filter.projectId);
 
-
-  // @ts-ignore
-  return <Wrapper className={ className }>
-    <Line isFirst>
-      <Title isFirst>Project:</Title>
-      <Select
-        isClearable
-        isSearchable
-        styles={ SELECT_STYLES }
-        onChange={ selected => setPartialOptions({filter: {projectId: selected?.value ?? ""}}) }
-        options={ projects.map(formatProjectSelectOption) }
-        value={ selectedProject ? formatProjectSelectOption(selectedProject) : undefined }
-      />
-      <Filler/>
-      <Title>Severities:</Title>
-      <Select
-        isClearable
-        isSearchable
-        isMulti
-        styles={ {
-          ...SELECT_STYLES,
-          option: (styles, {data, isFocused}) => ({
-            ...styles,
-            color: COLOR_DARK,
-            backgroundColor: isFocused ? SeverityToColor[data.value] : styles.backgroundColor
-          }),
-          multiValueRemove: (styles, {data}) => ({
-            ...styles,
-            ':hover': {
-              backgroundColor: SeverityToColor[data.value],
-              color: COLOR_DARK,
-            },
-          })
-        } }
-        options={ Object.values(LogSeverity).map(v => formatSelectOption(v)) }
-        value={ options.filter.severities?.map(v => formatSelectOption(v)) }
-        onChange={ selected => setPartialOptions({filter: {severities: selected.map(tup => tup.value)}}) }
-      />
-    </Line>
-    <Line>
-      <Title isFirst>Since:</Title>
-      <DurationPicker
-        selectedValue={ options.filter.fromAgo }
-        onChange={ value => setPartialOptions({filter: {fromAgo: value}}) }
-        unsetLabel="the beginning of time"/>
-      <Filler/>
-      <Title>Until:</Title>
-      <DurationPicker
-        selectedValue={ options.filter.untilAgo }
-        onChange={ value => setPartialOptions({filter: {untilAgo: value}}) }
-        unsetLabel="now"/>
-    </Line>
-    <Line>
-      <Title isFirst>Namespaces:</Title>
-      <StyledTagsInput
-        value={ options.filter.namespaces ?? [] }
-        onChange={ (namespaces) => setPartialOptions({filter: {namespaces: namespaces ?? []}}) }
-        onlyUnique
-        inputProps={ {placeholder: "Enter a namespace"} }
-      />
-      <Filler/>
-      <Title>Deployments:</Title>
-      <StyledTagsInput
-        value={ options.filter.containerNames ?? [] }
-        onChange={ (containerNames) => setPartialOptions({filter: {containerNames: containerNames ?? []}}) }
-        onlyUnique
-        inputProps={ {placeholder: "Enter a name"} }
-      />
-      <Filler/>
-    </Line>
-    <Line>
-      <Title isFirst>Query:</Title>
-      <Filler/>
-      <StyledInput
-        type="text"
-        placeholder='For example: resource.labels.cluster_name="prod" AND NOT timeout'
-        defaultValue={ options.filter.text }
-        onChange={ e => setPartialOptions({filter: {text: e.target.value}}) }
-      />
-    </Line>
-    <Line>
-      <Title isFirst>Schema:</Title>
-      <Filler/>
-      <StyledInput
-        type="text"
-        placeholder="Use dot notation to access log properties"
-        defaultValue={ options.schema }
-        onChange={ e => setPartialOptions({schema: e.target.value}) }
-        color={ COLOR_MAIN }
-      />
-    </Line>
-    <Line>
+  return <Wrapper className={ className } ref={forwardedRef}>
+    { !collapsed &&
+        <>
+            <Line isFirst>
+                <Title isFirst>Project:</Title>
+                <Select
+                    isClearable
+                    isSearchable
+                    styles={ SELECT_STYLES }
+                    onChange={ selected => setPartialOptions({filter: {projectId: selected?.value ?? ""}}) }
+                    options={ projects.map(formatProjectSelectOption) }
+                    value={ selectedProject ? formatProjectSelectOption(selectedProject) : undefined }
+                />
+                <Filler/>
+                <Title>Severities:</Title>
+                <Select
+                    isClearable
+                    isSearchable
+                    isMulti
+                    styles={ {
+                      ...SELECT_STYLES,
+                      option: (styles, {data, isFocused}) => ({
+                        ...styles,
+                        color: COLOR_DARK,
+                        backgroundColor: isFocused ? SeverityToColor[data.value] : styles.backgroundColor
+                      }),
+                      multiValueRemove: (styles, {data}) => ({
+                        ...styles,
+                        ':hover': {
+                          backgroundColor: SeverityToColor[data.value],
+                          color: COLOR_DARK,
+                        },
+                      })
+                    } }
+                    options={ Object.values(LogSeverity).map(v => formatSelectOption(v)) }
+                    value={ options.filter.severities?.map(v => formatSelectOption(v)) }
+                    onChange={ selected => setPartialOptions({filter: {severities: selected.map(tup => tup.value)}}) }
+                />
+            </Line>
+            <Line>
+                <Title isFirst>Since:</Title>
+                <DurationPicker
+                    selectedValue={ options.filter.fromAgo }
+                    onChange={ value => setPartialOptions({filter: {fromAgo: value}}) }
+                    unsetLabel="the beginning of time"/>
+                <Filler/>
+                <Title>Until:</Title>
+                <DurationPicker
+                    selectedValue={ options.filter.untilAgo }
+                    onChange={ value => setPartialOptions({filter: {untilAgo: value}}) }
+                    unsetLabel="now"/>
+            </Line>
+            <Line>
+                <Title isFirst>Namespaces:</Title>
+                <StyledTagsInput
+                    value={ options.filter.namespaces ?? [] }
+                    onChange={ (namespaces) => setPartialOptions({filter: {namespaces: namespaces ?? []}}) }
+                    onlyUnique
+                    inputProps={ {placeholder: "Enter a namespace"} }
+                />
+                <Filler/>
+                <Title>Deployments:</Title>
+                <StyledTagsInput
+                    value={ options.filter.containerNames ?? [] }
+                    onChange={ (containerNames) => setPartialOptions({filter: {containerNames: containerNames ?? []}}) }
+                    onlyUnique
+                    inputProps={ {placeholder: "Enter a name"} }
+                />
+                <Filler/>
+            </Line>
+            <Line>
+                <Title isFirst>Query:</Title>
+                <Filler/>
+                <StyledInput
+                    type="text"
+                    placeholder='For example: resource.labels.cluster_name="prod" AND NOT timeout'
+                    defaultValue={ options.filter.text }
+                    onChange={ e => setPartialOptions({filter: {text: e.target.value}}) }
+                />
+            </Line>
+            <Line>
+                <Title isFirst>Schema:</Title>
+                <Filler/>
+                <StyledInput
+                    type="text"
+                    placeholder="Use dot notation to access log properties"
+                    defaultValue={ options.schema }
+                    onChange={ e => setPartialOptions({schema: e.target.value}) }
+                    color={ COLOR_MAIN }
+                />
+            </Line>
+        </>
+    }
+    <Line isFirst={ collapsed }>
       <ApplyButton disabled={ !canApply } onClick={ () => canApply && apply() } title={ canApply ? "Apply" : "Disabled - Select all required options" }>
         Apply / Reload
       </ApplyButton>
+      <CollapseButton onClick={ toggleCollapsed } title={ collapsed ? "Expand" : "Collapse" } collapsed={ collapsed }>
+        ^
+      </CollapseButton>
       <Filler/>
-      <Title>Page size:</Title>
-      <NumberPicker
-        value={ options.pageSize }
-        setValue={ value => setPartialOptions({pageSize: value ?? DEFAULT_PAGE_SIZE}) }
-      />
-      <ActionButton title="Load" onClick={ () => triggerLoad() }>Load</ActionButton>
-      <ActionButton title="Save as" onClick={ () => triggerSaveAs() }>Save as</ActionButton>
+      {
+        !collapsed && <>
+              <Title>Page size:</Title>
+              <NumberPicker
+                  value={ options.pageSize }
+                  setValue={ value => setPartialOptions({pageSize: value ?? DEFAULT_PAGE_SIZE}) }
+              />
+              <ActionButton title="Load" onClick={ () => triggerLoad() }>Load</ActionButton>
+              <ActionButton title="Save as" onClick={ () => triggerSaveAs() }>Save as</ActionButton>
+          </>
+      }
     </Line>
   </Wrapper>;
 }

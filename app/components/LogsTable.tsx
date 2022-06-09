@@ -11,10 +11,10 @@ import { useWindowHeight } from "@react-hook/window-size";
 import { buildFormatter, EntryFormatter } from "../data/schema";
 import ILogEntry = google.logging.v2.ILogEntry;
 
-const Wrapper = styled.div<{ isEmpty: boolean, windowHeight: number }>`
+const Wrapper = styled.div<{ isEmpty: boolean, height: number }>`
   min-height: 64px;
   height: fit-content;
-  max-height: ${ ({windowHeight}) => windowHeight - 370 }px;
+  max-height: ${ ({height}) => height }px;
   overflow: auto;
   display: flex;
   flex-direction: column-reverse;
@@ -54,10 +54,11 @@ type LogsTableProps = {
   entries: ILogEntry[],
   fetchNext: () => Promise<void>,
   hasMore: boolean,
-  schema: string
+  schema: string,
+  optionsPaneHeight: number,
 };
 
-export const LogsTable = ({className, entries, fetchNext, hasMore, schema}: LogsTableProps) => {
+export const LogsTable = ({className, entries, fetchNext, hasMore, schema, optionsPaneHeight}: LogsTableProps) => {
   const isEmpty = entries.length === 0;
   const noResults = isEmpty && !hasMore;
   const windowHeight = useWindowHeight();
@@ -69,7 +70,7 @@ export const LogsTable = ({className, entries, fetchNext, hasMore, schema}: Logs
       id="scrollableDiv"
       className={ className }
       isEmpty={ isEmpty }
-      windowHeight={ windowHeight }
+      height={ windowHeight - optionsPaneHeight - 46 }
     >
       {
         noResults

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { GoogleProject } from "../common/googleProject";
 import { getDefaultOptions, Options } from "../data/options";
 import { fetchOptionsAsync, fetchPageAsync, fetchProjectsAsync, loadAsync, postOptionsAsync, saveAsAsync } from "../data/fetchData";
@@ -35,6 +35,9 @@ export const App = () => {
   const [showEntries, setShowEntries] = useState(projectIsSelected);
   const [shouldReset, setShouldReset] = useState<boolean>(false);
   const [webUrl, setWebUrl] = useState<string>();
+  const [optionsCollapsed, setOptionsCollapsed] = useState(false);
+  const optionsPaneRef = useRef<HTMLElement>(null);
+  const [optionsPaneHeight, setOptionsPaneHeight] = useState(0);
 
   const setPartialOptions = useCallback((newOptions: Partial<Options>, persist: boolean = true) => {
     console.log("setting partial options", newOptions);
@@ -104,6 +107,10 @@ export const App = () => {
     });
   }, [setOptions, setShouldReset]);
 
+  useEffect(() => {
+    setOptionsPaneHeight(optionsPaneRef.current?.clientHeight || 0);
+  }, [optionsPaneRef.current, optionsCollapsed]);
+
   return (
     <>
       {
@@ -111,12 +118,15 @@ export const App = () => {
       }
       {
         projects && <StyledOptionsPane
+              forwardedRef={ optionsPaneRef }
               options={ options }
               projects={ projects }
               setPartialOptions={ partialOptions => setPartialOptions(partialOptions) }
               apply={ () => resetEntries() }
               triggerLoad={ load }
               triggerSaveAs={ saveAs }
+              collapsed={ optionsCollapsed }
+              toggleCollapsed={ () => setOptionsCollapsed(collapsed => !collapsed) }
           />
       }
       {
@@ -125,6 +135,7 @@ export const App = () => {
               fetchNext={ fetchPageCallback }
               hasMore={ nextPageToken !== null }
               schema={ options.schema }
+              optionsPaneHeight={ optionsPaneHeight }
           />
       }
       {
