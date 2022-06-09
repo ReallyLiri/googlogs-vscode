@@ -41,6 +41,9 @@ const MultilineText = styled.div`
   word-wrap: break-word;
   white-space: pre-wrap;
   word-break: break-word;
+  ::selection {
+    background-color: black;
+  }
 `;
 
 const LogContent = ({entry, formatter}: { entry: ILogEntry, formatter: EntryFormatter }) => {
