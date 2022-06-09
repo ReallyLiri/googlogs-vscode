@@ -44,8 +44,8 @@ function buildFilterText(filter: LogFilter): string {
 
 const escapeQuery = (query: string) =>
   encodeURIComponent(query)
-    .replaceAll("(", "%28")
-    .replaceAll(")", "%29");
+    .replace(/\(/, "%28")
+    .replace(/\)/, "%29");
 
 const toWebUrl = (projectId: string, query: string) =>
   `https://console.cloud.google.com/logs/query;query=${ escapeQuery(query) };?project=${ projectId }`;

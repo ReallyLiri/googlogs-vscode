@@ -2,17 +2,31 @@
   "name": "googlogs",
   "displayName": "Googlogs",
   "description": "Google cloud logs viewer",
+  "publisher": "ReallyLiri",
   "version": "0.0.1",
+  "homepage": "https://github.com/ReallyLiri/googlogs-vscode",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ReallyLiri/googlogs-vscode.git"
+  },
   "engines": {
     "vscode": "^1.52.0"
   },
+  "license": "MIT",
   "categories": [
-    "Other"
+    "Programming",
+    "Visualization"
   ],
+  "keywords": [
+    "logs",
+    "cloud",
+    "google",
+    "gcloud",
+    "stackdriver"
+  ],
+  "icon": "icon.png",
   "activationEvents": [
-    "onStartupFinished",
-    "googlogs.explorer",
-    "onView:googlogs"
+    "onStartupFinished"
   ],
   "main": "./out/src/extension.js",
   "contributes": {
@@ -50,15 +64,20 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "yarn run compile",
+    "vscode:prepublish": "yarn run compile-prod",
     "compile": "npm-run-all compile:*",
-    "compile:extension": "tsc -p ./",
-    "compile:view": "webpack --mode development",
+    "compile-prod": "rm -rf out && npm-run-all compile-prod:*",
+    "compile:ext": "tsc -p ./",
+    "compile-prod:ext": "webpack --config webpack.ext.js",
+    "compile:app": "webpack --config webpack.app.js --mode development",
+    "compile-prod:app": "webpack --config webpack.app.js",
     "watch": "npm-run-all -p watch:*",
-    "watch:extension": "tsc -watch -p ./",
-    "watch:view": "webpack --watch --mode development",
+    "watch:ext": "tsc -watch -p ./",
+    "watch:app": "webpack --config webpack.app.js --watch --mode development",
     "lint": "eslint src --ext ts --fix",
-    "browser": "webpack serve --mode development"
+    "browser": "webpack serve --config webpack.app.js --mode development",
+    "vsix": "vsce package",
+    "vsix-install": "code --install-extension googlogs-${npm_package_version}.vsix"
   },
   "dependencies": {
     "@react-hook/window-size": "^3.0.7",
@@ -99,6 +118,7 @@
     "style-loader": "^2.0.0",
     "ts-loader": "^8.0.15",
     "typescript": "^4.1.2",
+    "vsce": "^2.9.1",
     "vscode-test": "^1.4.1",
     "webpack": "^5.21.1",
     "webpack-cli": "^4.5.0",

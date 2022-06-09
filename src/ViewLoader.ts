@@ -20,7 +20,7 @@ export class ViewLoader {
       enableScripts: true,
       retainContextWhenHidden: true,
       enableFindWidget: true,
-      localResourceRoots: [vscode.Uri.file(path.join(this.context.extensionPath, 'out', 'app'))],
+      localResourceRoots: [vscode.Uri.file(path.join(this.context.extensionPath, 'out'))],
     };
 
     this.panel = vscode.window.createWebviewPanel('googlogs', 'Google Logs', vscode.ViewColumn.One, options);
@@ -70,7 +70,7 @@ export class ViewLoader {
 
   render() {
     const bundleScriptPath = this.panel.webview.asWebviewUri(
-      vscode.Uri.file(path.join(this.context.extensionPath, 'out', 'app', 'bundle.js'))
+      vscode.Uri.file(path.join(this.context.extensionPath, 'out', 'app.js'))
     );
 
     return `
