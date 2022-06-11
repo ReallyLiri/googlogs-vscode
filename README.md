@@ -23,6 +23,8 @@ Currently, we only search for `resource.type="k8s_container"`. Other options are
 
 `Namespaces` and `Deployments` names are not validated or autocompleted, use with your own knowledge.
 
+![demo](res/opts.gif)
+
 ## Development
 
 `yarn browser` to run app in browser with data mocks.
