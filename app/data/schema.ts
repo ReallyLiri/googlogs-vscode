@@ -17,12 +17,24 @@ function obfuscate(char: string) {
   return String.fromCharCode(charCode);
 }
 
+function deserializeTextPayloadIfNeeded(entry: ILogEntry) {
+  const {textPayload} = entry;
+  if (textPayload && textPayload[0] === "{" && textPayload[textPayload.length - 1] === "}") {
+    try {
+      entry.textPayload = JSON.parse(textPayload);
+    } catch (e) {
+      console.debug("failed to parse textPayload", e);
+    }
+  }
+}
+
 export function buildFormatter(schema: string): EntryFormatter {
   let pathToLiteral: [string, string][] = [];
   const matches = schema.match(propertyRegexp);
   matches?.forEach(match => pathToLiteral.push([match.substring(1), match]));
 
   return (entry: ILogEntry) => {
+    deserializeTextPayloadIfNeeded(entry);
     let result = schema;
     for (const [path, literal] of pathToLiteral) {
       const rawValue = objectPath.get(entry, path);
