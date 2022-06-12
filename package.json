@@ -14,7 +14,7 @@
   },
   "license": "MIT",
   "categories": [
-    "Programming",
+    "Other",
     "Visualization"
   ],
   "keywords": [
@@ -64,6 +64,7 @@
     ]
   },
   "scripts": {
+    "pub": "vsce publish",
     "vscode:prepublish": "yarn run compile-prod",
     "compile": "npm-run-all compile:*",
     "compile-prod": "rm -rf out && npm-run-all compile-prod:*",

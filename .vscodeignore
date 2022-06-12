@@ -13,4 +13,3 @@ googlogs-v*.tgz
 *.vsix
 package*.json
 res/*.gif
-res/*.png
