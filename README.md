@@ -14,13 +14,6 @@ VSCode extension to view Google Cloud Logs.
 
 No logs data is persisted. Any retrieved data is stored in memory and never sent out to any 3rd party.
 
-## Install from Release
-
-* Download `vsix` from release page.
-* From VSCode’s main menu, select “Extensions”.
-* Click to open the three-dot menu at the top of the middle panel.
-* Select "Install from VSIX..." and follow the prompts.
-
 ## Search Options
 
 Currently, we only search for `resource.type="k8s_container"`. Other options are alo affiliated with GKE.
@@ -37,6 +30,13 @@ the `labels` property.
 `Namespaces` and `Deployments` names are not validated or autocompleted, use with your own knowledge.
 
 ![demo](res/opts.gif)
+
+## Install from Release
+
+* Download `vsix` from release page.
+* From VSCode’s main menu, select “Extensions”.
+* Click to open the three-dot menu at the top of the middle panel.
+* Select "Install from VSIX..." and follow the prompts.
 
 ## Development
 
