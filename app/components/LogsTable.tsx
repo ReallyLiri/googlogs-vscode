@@ -9,6 +9,7 @@ import { LogSeverity, SeverityToColor } from "../common/filter";
 import * as objectPath from "object-path";
 import { useWindowHeight } from "@react-hook/window-size";
 import { buildFormatter, EntryFormatter } from "../data/schema";
+import { ILogEntryWithCount } from "../data/dedup";
 import ILogEntry = google.logging.v2.ILogEntry;
 
 const Wrapper = styled.div<{ isEmpty: boolean, height: number }>`
@@ -41,14 +42,16 @@ const MultilineText = styled.div`
   word-wrap: break-word;
   white-space: pre-wrap;
   word-break: break-word;
+
   ::selection {
     background-color: black;
   }
 `;
 
-const LogContent = ({entry, formatter}: { entry: ILogEntry, formatter: EntryFormatter }) => {
+
+const LogContent = ({entry, formatter}: { entry: ILogEntryWithCount, formatter: EntryFormatter }) => {
   return <MultilineText>
-    { formatter(entry) }
+    { formatter(entry) }{ entry.count && entry.count > 1 && `\n\t(x${ entry.count })` }
   </MultilineText>;
 };
 
@@ -59,6 +62,7 @@ type LogsTableProps = {
   hasMore: boolean,
   schema: string,
   optionsPaneHeight: number,
+  dedup: boolean,
 };
 
 export const LogsTable = ({className, entries, fetchNext, hasMore, schema, optionsPaneHeight}: LogsTableProps) => {
@@ -87,11 +91,13 @@ export const LogsTable = ({className, entries, fetchNext, hasMore, schema, optio
             loader={ <Loader type="Grid" floating={ isEmpty } size={ isEmpty ? 64 : 32 }/> }
             scrollableTarget="scrollableDiv"
           >
-            { entries.map((entry, index) => (
-              <LogLine key={ index } severity={ entry.severity as LogSeverity }>
-                <LogContent entry={ entry } formatter={ formatter }/>
-              </LogLine>
-            )) }
+            {
+              entries.map((entry, index) => (
+                <LogLine key={ index } severity={ entry.severity as LogSeverity }>
+                  <LogContent entry={ entry } formatter={ formatter }/>
+                </LogLine>
+              ))
+            }
           </InfiniteScroll>
       }
     </Wrapper>

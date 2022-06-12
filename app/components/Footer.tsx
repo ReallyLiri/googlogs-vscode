@@ -1,9 +1,11 @@
 import styled from "styled-components";
-import { COLOR_LIGHT, COLOR_MAIN } from "../style";
+import { COLOR_DEBUG, COLOR_LIGHT, COLOR_MAIN } from "../style";
 import React from "react";
+import Switch from "react-switch";
 
 const StyledAnchor = styled.a`
   color: ${ COLOR_LIGHT };
+
   :hover {
     color: ${ COLOR_MAIN };
   }
@@ -27,17 +29,36 @@ const Line = styled.div<{ isFirst?: boolean }>`
   align-items: flex-start;
 `;
 
+const StyledSwitch = styled(Switch)`
+  margin-left: 8px;
+`;
+
 type FooterProps = {
   className?: string,
   webUrl: string,
   entriesCount: number,
-  hasMore: boolean
+  dedupCount: number,
+  hasMore: boolean,
+  dedup: boolean,
+  toggleDedup: () => void,
 };
 
-export const Footer = ({className, webUrl, entriesCount, hasMore}: FooterProps) => (
+export const Footer = ({className, webUrl, entriesCount, dedupCount, hasMore, dedup, toggleDedup}: FooterProps) => (
   <Line className={ className }>
-    <div>Showing <Highlighted>{ entriesCount }</Highlighted>{ hasMore ? "/?" : "" } results</div>
+    <div>Showing <Highlighted>{ dedup ? `${ dedupCount } (${ entriesCount })` : entriesCount }</Highlighted>{ hasMore ? " / ?" : "" } results</div>
     <Separator/>
     <StyledAnchor href={ webUrl } target="_blank">Open in web</StyledAnchor>
+    <Separator/>
+    <div>Deduplicate</div>
+    <StyledSwitch
+      onChange={ () => toggleDedup() }
+      checked={ dedup }
+      height={ 16 }
+      width={ 32 }
+      checkedIcon={ false }
+      uncheckedIcon={ false }
+      offColor={ COLOR_DEBUG }
+      onColor={ COLOR_MAIN }
+    />
   </Line>
 );

@@ -12,6 +12,7 @@ import { OptionsResultMessage, ProjectsResultMessage } from "../common/message";
 import { Footer } from "./Footer";
 import Error from "./Error";
 import { ErrorBoundary } from "react-error-boundary";
+import { dedupIfNeeded } from "../data/dedup";
 import ILogEntry = google.logging.v2.ILogEntry;
 
 const MARGIN = 8;
@@ -41,6 +42,7 @@ export const App = () => {
   const [optionsCollapsed, setOptionsCollapsed] = useState(false);
   const optionsPaneRef = useRef<HTMLElement>(null);
   const [optionsPaneHeight, setOptionsPaneHeight] = useState(0);
+  const [dedup, setDedup] = useState(false);
 
   const setPartialOptions = useCallback((newOptions: Partial<Options>, persist: boolean = true) => {
     console.log("setting partial options", newOptions);
@@ -131,6 +133,7 @@ export const App = () => {
 
   useEffect(() => {
     setOptionsPaneHeight(optionsPaneRef.current?.clientHeight || 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [optionsPaneRef.current, optionsCollapsed]);
 
   const retry = useCallback(() => {
@@ -142,6 +145,9 @@ export const App = () => {
   if (error) {
     return <Error error={ error } retry={ retry }/>;
   }
+
+  const dedupEntries = dedupIfNeeded(entries, dedup);
+
   return (
     <ErrorBoundary
       FallbackComponent={ props => {
@@ -167,18 +173,22 @@ export const App = () => {
       }
       {
         projects && showEntries && <StyledLogsTable
-              entries={ entries }
+              entries={ dedupEntries }
               fetchNext={ fetchPageCallback }
               hasMore={ nextPageToken !== null }
               schema={ options.schema }
               optionsPaneHeight={ optionsPaneHeight }
+              dedup={ dedup }
           />
       }
       {
         webUrl && <StyledFooter
               webUrl={ webUrl }
               entriesCount={ entries.length }
+              dedupCount={ dedupEntries.length }
               hasMore={ nextPageToken !== null }
+              dedup={ dedup }
+              toggleDedup={ () => setDedup(dedup => !dedup) }
           />
       }
     </ErrorBoundary>

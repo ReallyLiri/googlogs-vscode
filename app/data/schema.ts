@@ -58,6 +58,6 @@ export function buildFormatter(schema: string): EntryFormatter {
       }
       result = result.replace(literal, stringValue);
     }
-    return result;
+    return result.trim();
   };
 }
