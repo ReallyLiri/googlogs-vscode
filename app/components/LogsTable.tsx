@@ -31,10 +31,6 @@ const LogLine = styled.div<{ severity: LogSeverity }>`
   color: ${ ({severity}) => SeverityToColor[severity] };
   padding: 4px;
   margin: 4px 0 0 4px;
-
-  :hover {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
 `;
 
 const MultilineText = styled.div`
@@ -42,6 +38,10 @@ const MultilineText = styled.div`
   word-wrap: break-word;
   white-space: pre-wrap;
   word-break: break-word;
+
+  :hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
 
   ::selection {
     background-color: black;
