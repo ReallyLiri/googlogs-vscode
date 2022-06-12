@@ -2,6 +2,10 @@
 
 VSCode extension to view Google Cloud Logs.
 
+[![vsm-version](https://img.shields.io/visual-studio-marketplace/v/reallyliri.googlogs)](https://marketplace.visualstudio.com/items?itemName=reallyliri.googlogs)
+
+[View on the VSCode marketplace](https://marketplace.visualstudio.com/items?itemName=reallyliri.googlogs)
+
 <img src="res/icon.png" alt="icon" width="250">
 
 ![demo](res/demo.gif)
@@ -17,9 +21,14 @@ VSCode extension to view Google Cloud Logs.
 
 Currently, we only search for `resource.type="k8s_container"`. Other options are alo affiliated with GKE.
 
-`Query` uses same syntax and properties as the cloud logs search. See [Logging query language](https://cloud.google.com/logging/docs/view/logging-query-language).
+`Project` is mandatory.
 
-`Schema` is used to parse the results into raw log lines. Any log property should be prefixed with `.`. You can access nested properties with the dot notation. For example, `.labels.pod_name` will access the `pod_name` property of the `labels` property.
+`Query` uses same syntax and properties as the cloud logs search.
+See [Logging query language](https://cloud.google.com/logging/docs/view/logging-query-language).
+
+`Schema` is used to parse the results into raw log lines. Any log property should be prefixed with `.`. You can access
+nested properties with the dot notation. For example, `.labels.pod_name` will access the `pod_name` property of
+the `labels` property.
 
 `Namespaces` and `Deployments` names are not validated or autocompleted, use with your own knowledge.
 
