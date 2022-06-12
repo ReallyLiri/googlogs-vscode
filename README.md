@@ -10,6 +10,10 @@ VSCode extension to view Google Cloud Logs.
 
 ![demo](res/demo.gif)
 
+## Data Privacy
+
+No logs data is persisted. Any retrieved data is stored in memory and never sent out to any 3rd party.
+
 ## Install from Release
 
 * Download `vsix` from release page.
