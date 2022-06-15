@@ -4,7 +4,7 @@ import { Box, InputStyle, OPTION_WIDTH } from "./Styles";
 import { COLOR_MAIN } from "../../style";
 import React from "react";
 
-export const StyledTagsInput = styled(TagsInput)`
+const StyledTagsInput = styled(TagsInput)`
   ${ InputStyle };
   width: ${ OPTION_WIDTH }px;
   background-color: white;
@@ -43,3 +43,17 @@ export const StyledTagsInput = styled(TagsInput)`
     }
   }
 `;
+
+type TagsInputProps = {
+  values?: string[];
+  onChange: (values: string[]) => void;
+  placeholder: string;
+};
+export default ({values, onChange, placeholder}: TagsInputProps) => <StyledTagsInput
+  value={ values ?? [] }
+  onChange={ (newValues) => onChange(newValues ?? []) }
+  onlyUnique
+  addOnBlur
+  addOnPaste
+  inputProps={ {placeholder} }
+/>;

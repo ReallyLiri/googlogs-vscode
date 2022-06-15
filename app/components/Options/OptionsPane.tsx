@@ -8,7 +8,7 @@ import { LogSeverity, SeverityToColor } from "../../common/filter";
 import { Box, InputStyle, OPTION_WIDTH, SELECT_STYLES } from "./Styles";
 import { DurationPicker } from "./DurationPicker";
 import NumberPicker from "./NumberPicker";
-import { StyledTagsInput } from "./TagsInput";
+import TagsInput from "./TagsInput";
 
 const MARGIN = 16;
 
@@ -121,7 +121,7 @@ function OptionsPane({
   const canApply = options.filter.projectId && options.filter.projectId.length > 0;
   const selectedProject = projects.find(project => project.id === options.filter.projectId);
 
-  return <Wrapper className={ className } ref={forwardedRef}>
+  return <Wrapper className={ className } ref={ forwardedRef }>
     { !collapsed &&
         <>
             <Line isFirst>
@@ -175,19 +175,17 @@ function OptionsPane({
             </Line>
             <Line>
                 <Title isFirst>Namespaces:</Title>
-                <StyledTagsInput
-                    value={ options.filter.namespaces ?? [] }
-                    onChange={ (namespaces) => setPartialOptions({filter: {namespaces: namespaces ?? []}}) }
-                    onlyUnique
-                    inputProps={ {placeholder: "Enter a namespace"} }
+                <TagsInput
+                    values={ options.filter.namespaces }
+                    onChange={ (namespaces) => setPartialOptions({filter: {namespaces}}) }
+                    placeholder="Enter a namespace"
                 />
                 <Filler/>
                 <Title>Deployments:</Title>
-                <StyledTagsInput
-                    value={ options.filter.containerNames ?? [] }
-                    onChange={ (containerNames) => setPartialOptions({filter: {containerNames: containerNames ?? []}}) }
-                    onlyUnique
-                    inputProps={ {placeholder: "Enter a name"} }
+                <TagsInput
+                    values={ options.filter.containerNames }
+                    onChange={ (containerNames) => setPartialOptions({filter: {containerNames}}) }
+                    placeholder="Enter a name"
                 />
                 <Filler/>
             </Line>
