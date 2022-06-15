@@ -9,8 +9,17 @@ import { Box, InputStyle, OPTION_WIDTH, SELECT_STYLES } from "./Styles";
 import { DurationPicker } from "./DurationPicker";
 import NumberPicker from "./NumberPicker";
 import TagsInput from "./TagsInput";
+import Hint from "./Hint";
 
 const MARGIN = 16;
+
+const COMMON_PROPERTIES = [
+"resource.labels.project_id",
+"resource.labels.cluster_name",
+"resource.labels.namespace_name",
+"resource.labels.pod_name",
+"resource.labels.container_name",
+];
 
 const Wrapper = styled.div`
   ${ Box };
@@ -198,6 +207,7 @@ function OptionsPane({
                     defaultValue={ options.filter.text }
                     onChange={ e => setPartialOptions({filter: {text: e.target.value}}) }
                 />
+                <Hint content={`Common properties: ${COMMON_PROPERTIES.join(" ")}`}/>
             </Line>
             <Line>
                 <Title isFirst>Schema:</Title>

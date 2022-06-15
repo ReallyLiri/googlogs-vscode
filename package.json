@@ -82,6 +82,7 @@
   },
   "dependencies": {
     "@react-hook/window-size": "^3.0.7",
+    "@tippyjs/react": "^4.2.6",
     "axios": "^0.27.2",
     "moment": "^2.29.3",
     "object-path": "^0.11.8",
