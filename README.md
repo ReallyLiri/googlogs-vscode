@@ -2,7 +2,7 @@
 
 VSCode extension to view Google Cloud Logs.
 
-[![vsm-version](https://img.shields.io/visual-studio-marketplace/v/reallyliri.googlogs?label=VS%20Marketplace&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=reallyliri.googlogs)
+[![vsm-version](https://img.shields.io/visual-studio-marketplace/v/reallyliri.googlogs?label=VS%20Marketplace&logo=visual-studio-code&color=a135b8)](https://marketplace.visualstudio.com/items?itemName=reallyliri.googlogs)
 
 [View on the VSCode marketplace](https://marketplace.visualstudio.com/items?itemName=reallyliri.googlogs)
 
