@@ -8,9 +8,16 @@ import { LogHover, LogLineStyle, LogTextStyle } from "./Styles";
 import { ILogEntryWithCount } from "../../data/dedup";
 import { EntryFormatter } from "../../data/schema";
 
+const HEADER_HEIGHT = 41;
+
 const Headers = styled.tr<{ offset: number }>`
   position: relative;
-  bottom: ${ ({offset}) => offset }px;
+  bottom: ${ ({offset}) => offset - HEADER_HEIGHT }px;
+`;
+
+const Body = styled.tbody`
+  position: relative;
+  bottom: ${ -1 * HEADER_HEIGHT }px;
 `;
 
 const Header = styled.td`
@@ -65,23 +72,23 @@ type TableProps = {
 export const LogsTable = ({entries, formatter, headerOffset}: TableProps) => {
   const {items, columns} = toTableView(entries, formatter);
   return <table>
-    <tbody>
-    {
-      items.map(
-        (row, index) =>
-          <Row key={ index } severity={ row["severity"] as LogSeverity ?? LogSeverity.INFO }>
-            {
-              columns.map(
-                column => <>
-                  <Cell key={ index }>{ row[column] }</Cell>
-                  <ResizePlaceholder className="columnResizer" key={ index + "_resize" }/>
-                </>
-              )
-            }
-          </Row>
-      )
-    }
-    </tbody>
+    <Body>
+      {
+        items.map(
+          (row, index) =>
+            <Row key={ index } severity={ row["severity"] as LogSeverity ?? LogSeverity.INFO }>
+              {
+                columns.map(
+                  column => <>
+                    <Cell key={ index }>{ row[column] }</Cell>
+                    <ResizePlaceholder className="columnResizer" key={ index + "_resize" }/>
+                  </>
+                )
+              }
+            </Row>
+        )
+      }
+    </Body>
     <Headers offset={ headerOffset }>
       {
         columns.map(

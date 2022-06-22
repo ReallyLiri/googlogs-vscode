@@ -7,8 +7,7 @@ import { COLOR_MAIN } from "../../style";
 // @ts-ignore
 import * as objectPath from "object-path";
 import { useWindowHeight } from "@react-hook/window-size";
-import { buildFormatter, EntryFormatter } from "../../data/schema";
-import { ILogEntryWithCount } from "../../data/dedup";
+import { buildFormatter } from "../../data/schema";
 import { LogsTable } from "./LogsTable";
 import { LogsLines } from "./LogLines";
 import ILogEntry = google.logging.v2.ILogEntry;
@@ -46,18 +45,19 @@ export const LogsView = ({className, entries, fetchNext, hasMore, schema, option
   const windowHeight = useWindowHeight();
   const [scrollOffset, setScrollOffset] = useState(0);
   const wrapperRef = useRef(null);
-  const [entryCount, setEntryCount] = useState(entries.length);
 
   const formatter = useMemo(() => buildFormatter(schema), [schema]);
 
   useEffect(() => {
-    if (entryCount !== entries.length && wrapperRef.current) {
-      let wrapperElement = wrapperRef.current as Element;
+    if (wrapperRef.current) {
+      const wrapperElement = wrapperRef.current as Element;
       if (wrapperElement.scrollTop !== scrollOffset) {
         wrapperElement.scrollTo(wrapperElement.scrollLeft, scrollOffset);
       }
     }
-  }, [entries.length, entryCount, scrollOffset, wrapperRef]);
+  }, [entries.length, scrollOffset, wrapperRef]);
+
+  const viewHeight = windowHeight - optionsPaneHeight - 46;
 
   return (
     <Wrapper
@@ -65,7 +65,7 @@ export const LogsView = ({className, entries, fetchNext, hasMore, schema, option
       ref={ wrapperRef }
       className={ className }
       isEmpty={ isEmpty }
-      height={ windowHeight - optionsPaneHeight - 46 }
+      height={ viewHeight }
     >
       {
         noResults
@@ -85,7 +85,7 @@ export const LogsView = ({className, entries, fetchNext, hasMore, schema, option
           >
             {
               tableView
-                ? <LogsTable entries={entries} formatter={formatter} headerOffset={ optionsPaneHeight + Math.abs(scrollOffset) + 200 }/>
+                ? <LogsTable entries={ entries } formatter={ formatter } headerOffset={ viewHeight + Math.abs(scrollOffset) }/>
                 : <LogsLines entries={ entries } formatter={ formatter }/>
             }
           </InfiniteScroll>
