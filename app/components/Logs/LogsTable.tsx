@@ -8,7 +8,7 @@ import { LogHover, LogLineStyle, LogTextStyle } from "./Styles";
 import { ILogEntryWithCount } from "../../data/dedup";
 import { EntryFormatter } from "../../data/schema";
 
-const HEADER_HEIGHT = 41;
+const HEADER_HEIGHT = 50;
 
 const Headers = styled.tr<{ offset: number }>`
   position: relative;
@@ -17,7 +17,7 @@ const Headers = styled.tr<{ offset: number }>`
 
 const Body = styled.tbody`
   position: relative;
-  bottom: ${ -1 * HEADER_HEIGHT }px;
+  bottom: ${ -1 * HEADER_HEIGHT + 10 }px;
 `;
 
 const Header = styled.td`
@@ -49,18 +49,29 @@ const Cell = styled.td`
   ${ LogTextStyle };
 `;
 
+const COUNT_COLUMN = "count";
+
 const toTableView = (entries: ILogEntryWithCount[], formatter: EntryFormatter) => {
-  const columns = new Set<string>();
+  const columnsSet = new Set<string>();
+  let columnsList: string[] = [];
   const items = entries.map(entry => {
     const record = formatter.asRecord(entry);
     if (entry.count !== undefined) {
-      record["count"] = entry.count.toString();
+      record[COUNT_COLUMN] = entry.count.toString();
     }
-    Object.keys(record).forEach(column => columns.add(column));
+    Object.keys(record).forEach(column => {
+      if (!columnsSet.has(column)) {
+        columnsSet.add(column);
+        columnsList = [...columnsList, column];
+      }
+    });
     return record;
   });
   items.reverse();
-  return {items, columns: Array.from(columns)};
+  if (columnsList.includes(COUNT_COLUMN)) {
+    columnsList = [...columnsList.filter(column => column !== COUNT_COLUMN), COUNT_COLUMN];
+  }
+  return {items, columns: columnsList};
 };
 
 type TableProps = {
