@@ -14,6 +14,8 @@ export const getDefaultOptions = (projectId: string): Options => ({
   },
   pageSize: DEFAULT_PAGE_SIZE,
   schema: ".timestamp [.severity] .jsonPayload.caller .jsonPayload.mdc - .jsonPayload.message - .jsonPayload.e",
+  dedup: false,
+  tableView: false,
 });
 
 export type Options = {
@@ -21,4 +23,6 @@ export type Options = {
   filter: LogFilter,
   pageSize: number,
   schema: string,
+  dedup: boolean,
+  tableView: boolean,
 };

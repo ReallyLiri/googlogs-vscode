@@ -42,8 +42,6 @@ export const App = () => {
   const [optionsCollapsed, setOptionsCollapsed] = useState(false);
   const optionsPaneRef = useRef<HTMLElement>(null);
   const [optionsPaneHeight, setOptionsPaneHeight] = useState(0);
-  const [dedup, setDedup] = useState(false);
-  const [tableView, setTableView] = useState(false);
 
   const setPartialOptions = useCallback((newOptions: Partial<Options>, persist: boolean = true) => {
     console.log("setting partial options", newOptions);
@@ -147,7 +145,7 @@ export const App = () => {
     return <Error error={ error } retry={ retry }/>;
   }
 
-  const dedupEntries = dedupIfNeeded(entries, dedup);
+  const dedupEntries = dedupIfNeeded(entries, options.dedup);
 
   return (
     <ErrorBoundary
@@ -179,8 +177,8 @@ export const App = () => {
               hasMore={ nextPageToken !== null }
               schema={ options.schema }
               optionsPaneHeight={ optionsPaneHeight }
-              dedup={ dedup }
-              tableView={tableView}
+              dedup={ options.dedup }
+              tableView={ options.tableView }
           />
       }
       {
@@ -189,10 +187,10 @@ export const App = () => {
               entriesCount={ entries.length }
               dedupCount={ dedupEntries.length }
               hasMore={ nextPageToken !== null }
-              dedup={ dedup }
-              toggleDedup={ () => setDedup(dedup => !dedup) }
-              tableView={tableView}
-              toggleTableView={() => setTableView(table => !table)}
+              dedup={ options.dedup }
+              toggleDedup={ () => setPartialOptions({dedup: !options.dedup}) }
+              tableView={ options.tableView }
+              toggleTableView={ () => setPartialOptions({tableView: !options.tableView}) }
           />
       }
     </ErrorBoundary>
