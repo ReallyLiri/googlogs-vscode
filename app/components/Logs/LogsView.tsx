@@ -48,6 +48,8 @@ export const LogsView = ({className, entries, fetchNext, hasMore, schema, option
 
   const formatter = useMemo(() => buildFormatter(schema), [schema]);
 
+  const viewHeight = windowHeight - optionsPaneHeight - 46;
+
   useEffect(() => {
     if (wrapperRef.current) {
       const wrapperElement = wrapperRef.current as Element;
@@ -57,7 +59,15 @@ export const LogsView = ({className, entries, fetchNext, hasMore, schema, option
     }
   }, [entries.length, scrollOffset, wrapperRef]);
 
-  const viewHeight = windowHeight - optionsPaneHeight - 46;
+  useEffect(() => {
+    if (wrapperRef.current) {
+      const wrapperElement = wrapperRef.current as HTMLElement;
+      if (wrapperElement.scrollHeight < (viewHeight + 32) && hasMore) {
+        // noinspection JSIgnoredPromiseFromCall
+        fetchNext();
+      }
+    }
+  });
 
   return (
     <Wrapper
@@ -72,10 +82,7 @@ export const LogsView = ({className, entries, fetchNext, hasMore, schema, option
           ? <NoResults>No logs found 😔 Try to refine your search</NoResults>
           : <InfiniteScroll
             dataLength={ entries.length }
-            next={ async () => {
-              console.log("fetching next");
-              await fetchNext();
-            } }
+            next={ () => fetchNext() }
             style={ {display: "flex", flexDirection: "column-reverse", paddingBottom: 8} }
             inverse
             hasMore={ hasMore }
