@@ -4,7 +4,9 @@ import styled from "styled-components";
 import ColumnResizer from "react-table-column-resizer";
 import { COLOR_MAIN } from "../../style";
 import { LogSeverity } from "../../common/filter";
-import { LogLineStyle, LogTextStyle } from "./Styles";
+import { LogHover, LogLineStyle, LogTextStyle } from "./Styles";
+import { ILogEntryWithCount } from "../../data/dedup";
+import { EntryFormatter } from "../../data/schema";
 
 const Headers = styled.tr<{ offset: number }>`
   position: relative;
@@ -26,32 +28,53 @@ const StyledColumnResizer = styled(ColumnResizer)`
   margin: 2px;
 `;
 
+const ResizePlaceholder = styled.td`
+  background-color: white;
+  opacity: 20%;
+`;
+
 const Row = styled.tr<{ severity: LogSeverity }>`
-  ${LogLineStyle};
+  ${ LogLineStyle };
+  ${ LogHover };
 `;
 
 const Cell = styled.td`
-  ${LogTextStyle};
+  ${ LogTextStyle };
 `;
 
+const toTableView = (entries: ILogEntryWithCount[], formatter: EntryFormatter) => {
+  const columns = new Set<string>();
+  const items = entries.map(entry => {
+    const record = formatter.asRecord(entry);
+    if (entry.count !== undefined) {
+      record["count"] = entry.count.toString();
+    }
+    Object.keys(record).forEach(column => columns.add(column));
+    return record;
+  });
+  items.reverse();
+  return {items, columns: Array.from(columns)};
+};
+
 type TableProps = {
-  columns: string[]
-  items: Record<string, string>[]
+  entries: ILogEntryWithCount[]
+  formatter: EntryFormatter
   headerOffset: number
 };
 
-export const LogsTable = ({columns, items, headerOffset}: TableProps) => (
-  <table>
+export const LogsTable = ({entries, formatter, headerOffset}: TableProps) => {
+  const {items, columns} = toTableView(entries, formatter);
+  return <table>
     <tbody>
     {
-      [...items].reverse().map(
+      items.map(
         (row, index) =>
-          <Row key={ index } severity={row["severity"] as LogSeverity ?? LogSeverity.INFO}>
+          <Row key={ index } severity={ row["severity"] as LogSeverity ?? LogSeverity.INFO }>
             {
               columns.map(
                 column => <>
                   <Cell key={ index }>{ row[column] }</Cell>
-                  <td className="columnResizer" key={ index + "_resize" }/>
+                  <ResizePlaceholder className="columnResizer" key={ index + "_resize" }/>
                 </>
               )
             }
@@ -69,18 +92,5 @@ export const LogsTable = ({columns, items, headerOffset}: TableProps) => (
         )
       }
     </Headers>
-  </table>
-);
-/*
-
-    <tr>
-      {
-        columns.map(
-          column => <>
-            <td><div style={{position: "absolute", top: 500}}>{ column }</div></td>
-            <td className="columnResizer"/>
-          </>
-        )
-      }
-    </tr>
- */
+  </table>;
+};

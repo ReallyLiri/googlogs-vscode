@@ -1,14 +1,16 @@
 import { css } from "styled-components";
 import { LogSeverity, SeverityToColor } from "../../common/filter";
 
+export const LogHover = css`
+  :hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+`;
+
 export const LogTextStyle = css`
   word-wrap: break-word;
   white-space: pre-wrap;
   word-break: break-word;
-  
-  :hover {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
 
   ::selection {
     background-color: black;

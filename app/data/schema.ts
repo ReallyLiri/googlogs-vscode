@@ -9,7 +9,7 @@ const propertyRegexp = new RegExp("(\\.[a-z_-]+)+", "gis");
 
 export interface EntryFormatter {
   asString: (entry: ILogEntry) => string;
-  asMap: (entry: ILogEntry) => Record<string, string>
+  asRecord: (entry: ILogEntry) => Record<string, string>
 }
 
 const isObject = (value: any) => typeof value === "object";
@@ -72,7 +72,7 @@ export function buildFormatter(schema: string): EntryFormatter {
       }
       return result.trim();
     },
-    asMap: entry => {
+    asRecord: entry => {
       deserializeTextPayloadIfNeeded(entry);
       let result: Record<string, string> = {};
       for (const [path] of pathToLiteral) {

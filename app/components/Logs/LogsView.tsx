@@ -28,15 +28,6 @@ const NoResults = styled.div`
   color: ${ COLOR_MAIN };
 `;
 
-const toStringColumns = (entries: ILogEntryWithCount[], formatter: EntryFormatter) => {
-  const columns = new Set<string>();
-  const items = entries.map(entry => {
-    const record = formatter.asMap(entry);
-    Object.keys(record).forEach(column => columns.add(column));
-    return record;
-  });
-  return {items, columns: Array.from(columns)};
-};
 
 type LogsTableProps = {
   className?: string,
@@ -94,7 +85,7 @@ export const LogsView = ({className, entries, fetchNext, hasMore, schema, option
           >
             {
               tableView
-                ? <LogsTable { ...toStringColumns(entries, formatter) } headerOffset={ optionsPaneHeight + Math.abs(scrollOffset) + 200 }/>
+                ? <LogsTable entries={entries} formatter={formatter} headerOffset={ optionsPaneHeight + Math.abs(scrollOffset) + 200 }/>
                 : <LogsLines entries={ entries } formatter={ formatter }/>
             }
           </InfiniteScroll>

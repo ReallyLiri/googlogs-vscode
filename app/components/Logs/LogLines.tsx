@@ -3,7 +3,7 @@ import React from "react";
 import { ILogEntryWithCount } from "../../data/dedup";
 import styled from "styled-components";
 import { EntryFormatter } from "../../data/schema";
-import { LogLineStyle, LogTextStyle } from "./Styles";
+import { LogHover, LogLineStyle, LogTextStyle } from "./Styles";
 
 
 const LogLine = styled.div<{ severity: LogSeverity }>`
@@ -13,6 +13,7 @@ const LogLine = styled.div<{ severity: LogSeverity }>`
 const MultilineText = styled.div`
   width: 150%;
   ${ LogTextStyle };
+  ${ LogHover };
 `;
 
 const LogLineContent = ({entry, formatter}: { entry: ILogEntryWithCount, formatter: EntryFormatter }) => {
