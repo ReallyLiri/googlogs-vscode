@@ -19,6 +19,8 @@ const Anchor = styled.a`
   font-size: 14px;
   padding: 10px;
   margin-left: 4px;
+  user-select: none;
+  cursor: pointer;
 `;
 
 type HintProps = {

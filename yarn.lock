@@ -3987,6 +3987,11 @@ react-switch@^7.0.0:
   dependencies:
     prop-types "^15.7.2"
 
+react-table-column-resizer@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/react-table-column-resizer/-/react-table-column-resizer-1.0.1.tgz#0c0b46d7aa53ed37811f729aafdbd6707568a106"
+  integrity sha512-JOB3BMd37tr7W9x9YaB2coqpRo3IYpP7WGoekO+1h8LKVMfPmbxPhxazpjX8zzvlTaONtPA+EioEWFE8ZJ0ypg==
+
 react-tagsinput@^3.19.0:
   version "3.19.0"
   resolved "https://registry.yarnpkg.com/react-tagsinput/-/react-tagsinput-3.19.0.tgz#6e3b45595f2d295d4657bf194491988f948caabf"

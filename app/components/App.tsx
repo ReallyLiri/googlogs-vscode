@@ -4,7 +4,7 @@ import { getDefaultOptions, Options } from "../data/options";
 import { fetchOptionsAsync, fetchPageAsync, fetchProjectsAsync, loadAsync, postOptionsAsync, saveAsAsync } from "../data/fetchData";
 import { MessageType } from "../common/messageType";
 import { google } from "@google-cloud/logging/build/protos/protos";
-import { LogsTable } from "./LogsTable";
+import { LogsView } from "./Logs/LogsView";
 import Loader from "./Loader";
 import OptionsPane from "./Options/OptionsPane";
 import styled from "styled-components";
@@ -21,7 +21,7 @@ const StyledOptionsPane = styled(OptionsPane)`
   margin: ${ MARGIN }px;
 `;
 
-const StyledLogsTable = styled(LogsTable)`
+const StyledLogsTable = styled(LogsView)`
   margin: ${ MARGIN }px;
 `;
 
@@ -43,6 +43,7 @@ export const App = () => {
   const optionsPaneRef = useRef<HTMLElement>(null);
   const [optionsPaneHeight, setOptionsPaneHeight] = useState(0);
   const [dedup, setDedup] = useState(false);
+  const [tableView, setTableView] = useState(false);
 
   const setPartialOptions = useCallback((newOptions: Partial<Options>, persist: boolean = true) => {
     console.log("setting partial options", newOptions);
@@ -179,6 +180,7 @@ export const App = () => {
               schema={ options.schema }
               optionsPaneHeight={ optionsPaneHeight }
               dedup={ dedup }
+              tableView={tableView}
           />
       }
       {
@@ -189,6 +191,8 @@ export const App = () => {
               hasMore={ nextPageToken !== null }
               dedup={ dedup }
               toggleDedup={ () => setDedup(dedup => !dedup) }
+              tableView={tableView}
+              toggleTableView={() => setTableView(table => !table)}
           />
       }
     </ErrorBoundary>

@@ -39,7 +39,7 @@ async function fetchDataAsync<TInMessage extends Message, TOutMessage extends Me
 
 export const fetchProjectsAsync = async (): Promise<ProjectsResultMessage> => {
   if (isBrowserDebug) {
-    await sleep(3);
+    await sleep(1);
     return {type: MessageType.PROJECTS_RESULT, projects: MOCK_PROJECTS};
   }
   return await fetchDataAsync<FetchProjectsMessage, ProjectsResultMessage>(
@@ -50,7 +50,7 @@ export const fetchProjectsAsync = async (): Promise<ProjectsResultMessage> => {
 
 export const fetchPageAsync = async (message: FetchPageMessage): Promise<PageResultMessage> => {
   if (isBrowserDebug) {
-    await sleep(5);
+    await sleep(2);
     return {type: MessageType.PAGE_RESULT, nextPageToken: "token", entries: MOCK_LOGS, webUrl: MOCK_WEB_URL};
   }
   return await fetchDataAsync<FetchPageMessage, PageResultMessage>(

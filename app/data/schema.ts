@@ -7,7 +7,12 @@ const OBFUSCATE = false;
 
 const propertyRegexp = new RegExp("(\\.[a-z_-]+)+", "gis");
 
-export type EntryFormatter = (entry: ILogEntry) => string;
+export interface EntryFormatter {
+  asString: (entry: ILogEntry) => string;
+  asMap: (entry: ILogEntry) => Record<string, string>
+}
+
+const isObject = (value: any) => typeof value === "object";
 
 function obfuscate(char: string) {
   let charCode = char.charCodeAt(0);
@@ -28,36 +33,62 @@ function deserializeTextPayloadIfNeeded(entry: ILogEntry) {
   }
 }
 
+function formatString(rawValue: any, path: string): string {
+  if (!rawValue) {
+    return "";
+  }
+  if (typeof rawValue === "string") {
+    return path === "timestamp"
+      ? moment(rawValue as string).format("YYYY-MM-DD HH:mm:ss")
+      : rawValue;
+  } else if (isObject(rawValue) || Array.isArray(rawValue)) {
+    return JSON.stringify(rawValue);
+  }
+  return rawValue.toString();
+}
+
+function getStringValue(path: string, entry: ILogEntry) {
+  const rawValue = objectPath.get(entry, path);
+  let stringValue = formatString(rawValue, path);
+  if (OBFUSCATE) {
+    // for recording purposes
+    stringValue = stringValue.split("").map(c => obfuscate(c)).join("");
+  }
+  return stringValue;
+}
+
 export function buildFormatter(schema: string): EntryFormatter {
   let pathToLiteral: [string, string][] = [];
   const matches = schema.match(propertyRegexp);
   matches?.forEach(match => pathToLiteral.push([match.substring(1), match]));
 
-  return (entry: ILogEntry) => {
-    deserializeTextPayloadIfNeeded(entry);
-    let result = schema;
-    for (const [path, literal] of pathToLiteral) {
-      const rawValue = objectPath.get(entry, path);
-      let stringValue = "";
-      if (rawValue) {
-        if (typeof rawValue === "string") {
-          if (path === "timestamp") {
-            stringValue = moment(rawValue as string).format("YYYY-MM-DD HH:mm:ss");
-          } else {
-            stringValue = rawValue;
+  return {
+    asString: (entry: ILogEntry) => {
+      deserializeTextPayloadIfNeeded(entry);
+      let result = schema;
+      for (const [path, literal] of pathToLiteral) {
+        const stringValue = getStringValue(path, entry);
+        result = result.replace(literal, stringValue);
+      }
+      return result.trim();
+    },
+    asMap: entry => {
+      deserializeTextPayloadIfNeeded(entry);
+      let result: Record<string, string> = {};
+      for (const [path] of pathToLiteral) {
+        const columnName = path.split(".").pop()!;
+        if (columnName.toLowerCase() === "mdc") {
+          const rawValue = objectPath.get(entry, path);
+          if (isObject(rawValue)) {
+            Object.keys(rawValue).forEach(key => {
+              result[key] = formatString(rawValue[key], key);
+            });
+            continue;
           }
-        } else if (typeof rawValue === "object" || Array.isArray(rawValue)) {
-          stringValue = JSON.stringify(rawValue);
-        } else {
-          stringValue = rawValue.toString();
         }
+        result[columnName] = getStringValue(path, entry);
       }
-      if (OBFUSCATE) {
-        // for recording purposes
-        stringValue = stringValue.split("").map(c => obfuscate(c)).join("");
-      }
-      result = result.replace(literal, stringValue);
+      return result;
     }
-    return result.trim();
   };
 }

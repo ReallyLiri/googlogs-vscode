@@ -14,11 +14,11 @@ import Hint from "./Hint";
 const MARGIN = 16;
 
 const COMMON_PROPERTIES = [
-"resource.labels.project_id",
-"resource.labels.cluster_name",
-"resource.labels.namespace_name",
-"resource.labels.pod_name",
-"resource.labels.container_name",
+  "resource.labels.project_id",
+  "resource.labels.cluster_name",
+  "resource.labels.namespace_name",
+  "resource.labels.pod_name",
+  "resource.labels.container_name",
 ];
 
 const Wrapper = styled.div`
@@ -95,6 +95,7 @@ const CollapseButton = styled.div<{ collapsed: boolean }>`
   padding-top: 4px;
   transform: ${ ({collapsed}) => collapsed ? "scaleY(-1)" : "unset" };
   box-sizing: border-box;
+  user-select: none;
 `;
 
 const formatProjectSelectOption = (project: GoogleProject) =>
@@ -207,7 +208,7 @@ function OptionsPane({
                     defaultValue={ options.filter.text }
                     onChange={ e => setPartialOptions({filter: {text: e.target.value}}) }
                 />
-                <Hint content={`Common properties: ${COMMON_PROPERTIES.join(" ")}`}/>
+                <Hint content={ `Common properties: ${ COMMON_PROPERTIES.join(" ") }` }/>
             </Line>
             <Line>
                 <Title isFirst>Schema:</Title>

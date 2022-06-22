@@ -94,6 +94,7 @@
     "react-router-dom": "^5.2.0",
     "react-select": "^5.3.2",
     "react-switch": "^7.0.0",
+    "react-table-column-resizer": "^1.0.1",
     "react-tagsinput": "^3.19.0",
     "styled-components": "5.3.5"
   },
