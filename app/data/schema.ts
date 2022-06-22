@@ -5,7 +5,7 @@ import ILogEntry = google.logging.v2.ILogEntry;
 
 const OBFUSCATE = false;
 
-const propertyRegexp = new RegExp("(\\.[a-z]+)+", "gis");
+const propertyRegexp = new RegExp("(\\.[a-z_-]+)+", "gis");
 
 export type EntryFormatter = (entry: ILogEntry) => string;
 
