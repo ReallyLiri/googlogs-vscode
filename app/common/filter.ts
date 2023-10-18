@@ -30,6 +30,7 @@ export type Duration = {
 };
 
 export type LogFilter = {
+  resourceType?: string,
   projectId?: string,
   containerNames?: string[],
   namespaces?: string[],

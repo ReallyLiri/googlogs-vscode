@@ -16,7 +16,7 @@ No logs data is persisted. Any retrieved data is stored in memory and never sent
 
 ## Search Options
 
-Currently, we only search for `resource.type="k8s_container"`. Other options are alo affiliated with GKE.
+Currently, we focus of search for `resource.type="k8s_container"`. Other options are also affiliated with GKE.
 
 `Project` is mandatory.
 

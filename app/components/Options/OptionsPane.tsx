@@ -135,7 +135,16 @@ function OptionsPane({
     { !collapsed &&
         <>
             <Line isFirst>
-                <Title isFirst>Project:</Title>
+              <Title isFirst>Resource:</Title>
+              <StyledInput
+                type="text"
+                placeholder='For example: k8s_container'
+                defaultValue={ options.filter.resourceType }
+                onChange={ e => setPartialOptions({filter: {resourceType: e.target.value}}) }
+              />
+              <Filler/>
+              <Filler/>
+                <Title>Project:</Title>
                 <Select
                     isClearable
                     isSearchable
@@ -145,31 +154,34 @@ function OptionsPane({
                     value={ selectedProject ? formatProjectSelectOption(selectedProject) : undefined }
                 />
                 <Filler/>
-                <Title>Severities:</Title>
-                <Select
-                    isClearable
-                    isSearchable
-                    isMulti
-                    styles={ {
-                      ...SELECT_STYLES,
-                      option: (styles, {data, isFocused}) => ({
-                        ...styles,
-                        color: COLOR_DARK,
-                        backgroundColor: isFocused ? SeverityToColor[data.value] : styles.backgroundColor
-                      }),
-                      multiValueRemove: (styles, {data}) => ({
-                        ...styles,
-                        ':hover': {
+            </Line>
+          <Line>
+            <Title isFirst>Severities:</Title>
+            <Select
+              isClearable
+              isSearchable
+              isMulti
+              styles={ {
+                  ...SELECT_STYLES,
+                  option: (styles, {data, isFocused}) => ({
+                      ...styles,
+                      color: COLOR_DARK,
+                      backgroundColor: isFocused ? SeverityToColor[data.value] : styles.backgroundColor
+                  }),
+                  multiValueRemove: (styles, {data}) => ({
+                      ...styles,
+                      ':hover': {
                           backgroundColor: SeverityToColor[data.value],
                           color: COLOR_DARK,
-                        },
-                      })
-                    } }
-                    options={ Object.values(LogSeverity).map(v => formatSelectOption(v)) }
-                    value={ options.filter.severities?.map(v => formatSelectOption(v)) }
-                    onChange={ selected => setPartialOptions({filter: {severities: selected.map(tup => tup.value)}}) }
-                />
-            </Line>
+                      },
+                  })
+              } }
+              options={ Object.values(LogSeverity).map(v => formatSelectOption(v)) }
+              value={ options.filter.severities?.map(v => formatSelectOption(v)) }
+              onChange={ selected => setPartialOptions({filter: {severities: selected.map(tup => tup.value)}}) }
+            />
+            <Filler/>
+          </Line>
             <Line>
                 <Title isFirst>Since:</Title>
                 <DurationPicker

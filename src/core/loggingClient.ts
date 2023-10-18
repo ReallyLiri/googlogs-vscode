@@ -19,8 +19,11 @@ function durationAgoToTimestamp(duration: Duration) {
 }
 
 function buildFilterText(filter: LogFilter): string {
-  const parts = ['resource.type="k8s_container"'];
-  const {text, containerNames, namespaces, severities, fromAgo, untilAgo} = filter;
+  const parts = [];
+  const {resourceType, text, containerNames, namespaces, severities, fromAgo, untilAgo} = filter;
+  if (resourceType) {
+    parts.push(`resource.type="${ resourceType }"`);
+  }
   if (text) {
     parts.push(text);
   }
