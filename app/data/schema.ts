@@ -57,13 +57,24 @@ function getStringValue(path: string, entry: ILogEntry) {
   return stringValue;
 }
 
+function getRawLogValue(entry: ILogEntry): string {
+  if (entry.textPayload) {
+    return entry.textPayload;
+  }
+  return formatString(entry, "");
+}
+
 export function buildFormatter(schema: string): EntryFormatter {
   let pathToLiteral: [string, string][] = [];
   const matches = schema.match(propertyRegexp);
   matches?.forEach(match => pathToLiteral.push([match.substring(1), match]));
+  const schemaIsEmpty = !schema || schema === "";
 
   return {
     asString: (entry: ILogEntry) => {
+      if (schemaIsEmpty) {
+        return getRawLogValue(entry);
+      }
       deserializeTextPayloadIfNeeded(entry);
       let result = schema;
       for (const [path, literal] of pathToLiteral) {
@@ -73,6 +84,9 @@ export function buildFormatter(schema: string): EntryFormatter {
       return result.trim();
     },
     asRecord: entry => {
+      if (schemaIsEmpty) {
+        return {message: getRawLogValue(entry)};
+      }
       deserializeTextPayloadIfNeeded(entry);
       let result: Record<string, string> = {};
       for (const [path] of pathToLiteral) {
